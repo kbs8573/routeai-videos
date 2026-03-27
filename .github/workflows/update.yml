@@ -1,0 +1,29 @@
+name: Update video data
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # 6시간마다 자동 실행
+  workflow_dispatch:          # GitHub UI에서 수동 실행 가능
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch videos
+        run: python scripts/fetch_videos.py
+
+      - name: Commit data.json if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet && echo "No changes" || (
+            git commit -m "chore: update video data $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          )
