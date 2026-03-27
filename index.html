@@ -311,7 +311,7 @@ async function loadVideos() {
     show('loading', false);
     render(fromJson.videos);
     setTxt('sub-text', `@routeai · 동영상 ${fromJson.videos.length}개`);
-    setUpdTime(fromJson.updated);
+    setUpdTime(new Date().toISOString());
     return;
   }
 
