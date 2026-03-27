@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RouteAI 최근 동영상</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1c1c1c;
+      --surface2: #282828;
+      --border: #333;
+      --text: #f0f0f0;
+      --muted: #999;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #111;
+      border-bottom: 1px solid var(--border);
+      padding: 18px 28px;
+      display: flex; align-items: center; gap: 14px;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, #ff4444, #ff8c00);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    header h1 { font-size: 19px; font-weight: 700; }
+    header p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .upd-time  { font-size: 12px; color: var(--muted); }
+    .btn-refresh {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 7px 14px; border-radius: 8px;
+      cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;
+      transition: background .2s;
+    }
+    .btn-refresh:hover { background: #ff4444; border-color: #ff4444; }
+
+    /* ── Main ── */
+    main { max-width: 1380px; margin: 0 auto; padding: 28px 20px; }
+
+    /* ── Filter bar ── */
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
+    .chip {
+      padding: 8px 18px; border-radius: 100px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: 2px solid transparent;
+      transition: all .15s; display: flex; align-items: center; gap: 6px;
+      user-select: none;
+    }
+    .chip .cnt { background: rgba(255,255,255,.18); border-radius: 100px; padding: 1px 7px; font-size: 11px; }
+    .c-all { background: rgba(255,68,68,.15);   color: #ff6b6b; }
+    .c-w1  { background: rgba(34,197,94,.15);   color: #4ade80; }
+    .c-w2  { background: rgba(251,191,36,.15);  color: #fbbf24; }
+    .c-old { background: rgba(148,163,184,.15); color: #94a3b8; }
+    .chip.active { border-color: currentColor; }
+
+    /* ── Section ── */
+    .section { margin-bottom: 48px; }
+    .sec-head {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 20px; border-radius: 12px; margin-bottom: 20px;
+    }
+    .h-w1  { background: rgba(34,197,94,.08);   border: 1px solid rgba(34,197,94,.25); }
+    .h-w2  { background: rgba(251,191,36,.08);  border: 1px solid rgba(251,191,36,.25); }
+    .h-old { background: rgba(148,163,184,.08); border: 1px solid rgba(148,163,184,.25); }
+    .sec-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .h-w1 .sec-dot  { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+    .h-w2 .sec-dot  { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+    .h-old .sec-dot { background: #94a3b8; }
+    .sec-name { font-size: 17px; font-weight: 800; }
+    .h-w1 .sec-name  { color: #4ade80; }
+    .h-w2 .sec-name  { color: #fbbf24; }
+    .h-old .sec-name { color: #94a3b8; }
+    .sec-cnt {
+      font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 100px;
+    }
+    .h-w1 .sec-cnt  { background: rgba(34,197,94,.2);   color: #4ade80; }
+    .h-w2 .sec-cnt  { background: rgba(251,191,36,.2);  color: #fbbf24; }
+    .h-old .sec-cnt { background: rgba(148,163,184,.2); color: #94a3b8; }
+    .sec-desc { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    /* ── Grid ── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      text-decoration: none; color: inherit; display: block;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,.6); border-color: #555; }
+
+    .thumb { position: relative; aspect-ratio: 16/9; background: #1a1a1a; overflow: hidden; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+    .card:hover .thumb img { transform: scale(1.04); }
+
+    .thumb-err {
+      position: absolute; inset: 0;
+      display: none; align-items: center; justify-content: center;
+      background: #1a1a1a; color: #444; font-size: 36px;
+    }
+
+    .badge-new {
+      position: absolute; top: 8px; left: 8px;
+      background: #ff4444; color: #fff;
+      font-size: 10px; font-weight: 800; padding: 3px 7px; border-radius: 4px;
+    }
+    .badge-dur {
+      position: absolute; bottom: 8px; right: 8px;
+      background: rgba(0,0,0,.85); color: #fff;
+      font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+    }
+    .play-wrap {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .card:hover .play-wrap { background: rgba(0,0,0,.28); }
+    .play-btn {
+      width: 48px; height: 48px; background: rgba(255,255,255,.9); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: scale(.8); transition: all .2s;
+    }
+    .play-btn svg { width: 18px; height: 18px; fill: #111; margin-left: 3px; }
+    .card:hover .play-btn { opacity: 1; transform: scale(1); }
+
+    .card-body { padding: 12px 14px 14px; }
+    .card-title {
+      font-size: 13.5px; font-weight: 600; line-height: 1.45;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; margin-bottom: 10px; color: #f0f0f0;
+    }
+    .card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .card-views { font-size: 12px; color: var(--muted); }
+    .card-when { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
+    .w-w1  { background: rgba(34,197,94,.2);   color: #4ade80; }
+    .w-w2  { background: rgba(251,191,36,.2);  color: #fbbf24; }
+    .w-old { background: rgba(148,163,184,.2); color: #94a3b8; }
+
+    /* ── Status states ── */
+    .empty { grid-column: 1/-1; padding: 40px; text-align: center; color: var(--muted); font-size: 14px; }
+
+    #loading {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 100px 24px; gap: 18px;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border); border-top-color: #ff4444;
+      border-radius: 50%; animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { color: var(--muted); font-size: 14px; }
+    #loading small { color: #555; font-size: 12px; }
+
+    #err-box {
+      display: none;
+      background: rgba(255,68,68,.08); border: 1px solid rgba(255,68,68,.3);
+      border-radius: 12px; padding: 24px; margin-bottom: 24px;
+    }
+    #err-box h3 { color: #ff6b6b; margin-bottom: 8px; font-size: 15px; }
+    #err-box p  { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .api-box { margin-top: 16px; padding: 14px; background: var(--surface2); border-radius: 8px; }
+    .api-box strong { font-size: 13px; display: block; margin-bottom: 4px; }
+    .api-box small  { color: var(--muted); font-size: 12px; }
+    .api-box small a { color: #ff6b6b; }
+    .api-box input {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 12px; border-radius: 6px;
+      font-size: 13px; width: 100%; margin-top: 8px; font-family: monospace;
+    }
+    .api-btn {
+      margin-top: 8px; background: #ff4444; color: #fff;
+      border: none; padding: 9px 16px; border-radius: 6px;
+      cursor: pointer; font-size: 13px; font-weight: 600; width: 100%;
+    }
+    .api-btn:hover { background: #cc2222; }
+
+    #content { display: none; }
+
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; }
+      main   { padding: 18px 12px; }
+      .grid  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="avatar">R</div>
+  <div>
+    <h1>RouteAI 최근 동영상</h1>
+    <p id="sub-text">@routeai · 불러오는 중…</p>
+  </div>
+  <div class="hdr-right">
+    <span class="upd-time" id="upd-time"></span>
+    <button class="btn-refresh" onclick="loadVideos()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"/>
+        <polyline points="1 20 1 14 7 14"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      새로고침
+    </button>
+  </div>
+</header>
+
+<main>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p id="load-msg">YouTube 채널 데이터 불러오는 중…</p>
+    <small id="load-detail"></small>
+  </div>
+
+  <div id="err-box">
+    <h3>⚠️ 동영상을 불러올 수 없습니다</h3>
+    <p id="err-detail">오류가 발생했습니다.</p>
+    <div class="api-box">
+      <strong>YouTube Data API v3 키 입력 (가장 안정적)</strong>
+      <small>
+        <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank">
+          Google Cloud Console
+        </a>에서 무료 발급 가능합니다.
+      </small>
+      <input type="text" id="key-input" placeholder="AIza…" />
+      <button class="api-btn" onclick="tryWithKey()">API 키로 불러오기</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="filter-bar">
+      <div class="chip c-all active" onclick="setFilter(this,'all')">🎬 전체 <span class="cnt" id="cnt-all">0</span></div>
+      <div class="chip c-w1"  onclick="setFilter(this,'w1')">🔥 지난 1주 <span class="cnt" id="cnt-w1">0</span></div>
+      <div class="chip c-w2"  onclick="setFilter(this,'w2')">📅 지난 2주 <span class="cnt" id="cnt-w2">0</span></div>
+      <div class="chip c-old" onclick="setFilter(this,'old')">🗂 2주 이상 <span class="cnt" id="cnt-old">0</span></div>
+    </div>
+
+    <div class="section" id="sec-w1">
+      <div class="sec-head h-w1">
+        <span class="sec-dot"></span>
+        <span class="sec-name">지난 1주</span>
+        <span class="sec-cnt" id="sc-w1">0개</span>
+        <span class="sec-desc">최근 7일 이내 업로드</span>
+      </div>
+      <div class="grid" id="grid-w1"></div>
+    </div>
+
+    <div class="section" id="sec-w2">
+      <div class="sec-head h-w2">
+        <span class="sec-dot"></span>
+        <span class="sec-name">지난 2주</span>
+        <span class="sec-cnt" id="sc-w2">0개</span>
+        <span class="sec-desc">7~14일 전 업로드</span>
+      </div>
+      <div class="grid" id="grid-w2"></div>
+    </div>
+
+    <div class="section" id="sec-old">
+      <div class="sec-head h-old">
+        <span class="sec-dot"></span>
+        <span class="sec-name">2주 이상</span>
+        <span class="sec-cnt" id="sc-old">0개</span>
+        <span class="sec-desc">14일 이전 업로드</span>
+      </div>
+      <div class="grid" id="grid-old"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Config
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const YT_CHANNEL_URL = 'https://www.youtube.com/@routeai/videos';
+
+// Multiple CORS proxies tried in parallel — fastest/working one wins
+const CORS_PROXIES = [
+  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  u => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`,
+];
+
+let savedKey = localStorage.getItem('yt_api_key') || '';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Main
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function loadVideos() {
+  show('loading', true);
+  show('err-box', false);
+  show('content', false);
+  setTxt('load-msg', 'YouTube 채널 데이터 불러오는 중…');
+  setTxt('load-detail', '');
+
+  let videos = null;
+
+  // 1. YouTube Data API (if key available)
+  if (savedKey) {
+    setTxt('load-detail', 'YouTube API 사용 중…');
+    videos = await fetchYouTubeAPI(savedKey);
+  }
+
+  // 2. Scrape YouTube page via corsproxy.io (most reliable, no key needed)
+  if (!videos) {
+    setTxt('load-detail', 'corsproxy.io 경유 YouTube 파싱 중…');
+    videos = await scrapeYouTubePage();
+  }
+
+  // 3. Invidious (fallback)
+  if (!videos) {
+    setTxt('load-detail', 'Invidious API 시도 중…');
+    videos = await fetchInvidious();
+  }
+
+  show('loading', false);
+
+  if (videos && videos.length) {
+    render(videos);
+    setTxt('sub-text', `@routeai · 동영상 ${videos.length}개`);
+    setTxt('upd-time', `업데이트: ${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}`);
+  } else {
+    showErr('모든 방법으로 데이터를 가져오지 못했습니다. YouTube API 키를 입력하면 안정적으로 불러올 수 있습니다.');
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Method 1: Scrape YouTube page (primary)
+// Tries all CORS proxies in parallel, uses first success
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function scrapeYouTubePage() {
+  // Race all proxies simultaneously — use whichever responds first with valid HTML
+  const html = await raceProxies(YT_CHANNEL_URL);
+  if (!html) return null;
+  try {
+
+    // Extract ytInitialData JSON
+    let dataStr = null;
+    const patterns = [
+      /var ytInitialData\s*=\s*(\{.+?\});\s*(?:var|window|<\/script>)/s,
+      /ytInitialData\s*=\s*(\{.+?\});\s*(?:var|window|<\/script>)/s,
+      /"ytInitialData"\s*,\s*(\{.+?\})\)/s,
+    ];
+    for (const pat of patterns) {
+      const m = html.match(pat);
+      if (m) { dataStr = m[1]; break; }
+    }
+
+    if (!dataStr) {
+      // Brace-counting extraction
+      const startIdx = html.indexOf('var ytInitialData = ');
+      if (startIdx !== -1) {
+        const jsonStart = html.indexOf('{', startIdx);
+        let depth = 0, i = jsonStart;
+        for (; i < html.length; i++) {
+          if (html[i] === '{') depth++;
+          else if (html[i] === '}') { depth--; if (depth === 0) break; }
+        }
+        dataStr = html.slice(jsonStart, i + 1);
+      }
+    }
+
+    if (!dataStr) throw new Error('ytInitialData not found');
+    const data = JSON.parse(dataStr);
+    return parseYtInitialData(data);
+  } catch(e) {
+    console.warn('YouTube scrape failed:', e.message);
+    return null;
+  }
+}
+
+// Race all CORS proxies — return first HTML that contains ytInitialData
+async function raceProxies(targetUrl) {
+  return new Promise(resolve => {
+    let done = false;
+    let pending = CORS_PROXIES.length;
+
+    CORS_PROXIES.forEach(mkProxy => {
+      const url = mkProxy(targetUrl);
+      fetch(url, { signal: AbortSignal.timeout(14000) })
+        .then(async r => {
+          if (!r.ok) throw new Error(`${r.status}`);
+          const text = await r.text();
+          if (!text.includes('ytInitialData')) throw new Error('no ytInitialData');
+          if (!done) { done = true; resolve(text); }
+        })
+        .catch(() => {
+          pending--;
+          if (pending === 0 && !done) resolve(null);
+        });
+    });
+  });
+}
+
+// Navigate ytInitialData structure to extract videos
+function parseYtInitialData(data) {
+  try {
+    // Try to find the Videos tab content
+    const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs ?? [];
+    let videoItems = null;
+
+    for (const tab of tabs) {
+      const tr = tab.tabRenderer;
+      if (!tr) continue;
+      // Look for the Videos tab
+      const content = tr.content;
+      if (!content) continue;
+
+      // richGridRenderer (newer layout)
+      const grid = content.richGridRenderer?.contents
+        ?? content.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents?.[0]?.gridRenderer?.items;
+
+      if (grid) { videoItems = grid; break; }
+
+      // sectionList fallback
+      const sections = content.sectionListRenderer?.contents;
+      if (sections) {
+        for (const sec of sections) {
+          const items = sec.itemSectionRenderer?.contents?.[0]?.gridRenderer?.items
+            ?? sec.itemSectionRenderer?.contents;
+          if (items && items.length) { videoItems = items; break; }
+        }
+        if (videoItems) break;
+      }
+    }
+
+    if (!videoItems) {
+      // Broader search: walk the entire object looking for videoRenderer
+      videoItems = findVideoRenderers(data);
+    }
+
+    if (!videoItems || !videoItems.length) throw new Error('No video items found');
+
+    const now = new Date();
+    const videos = [];
+
+    for (const item of videoItems) {
+      const vr = item.richItemRenderer?.content?.videoRenderer
+        ?? item.gridVideoRenderer
+        ?? item.videoRenderer;
+      if (!vr) continue;
+
+      const videoId = vr.videoId;
+      if (!videoId) continue;
+
+      const title = vr.title?.runs?.[0]?.text
+        ?? vr.title?.simpleText
+        ?? '(제목 없음)';
+
+      // Parse published time text → approximate date
+      const timeText = vr.publishedTimeText?.simpleText ?? '';
+      const publishedAt = parseRelativeTime(timeText, now);
+
+      // View count
+      const viewText = vr.viewCountText?.simpleText
+        ?? vr.viewCountText?.runs?.map(r=>r.text).join('')
+        ?? '';
+      const views = parseViews(viewText);
+
+      // Duration
+      const dur = vr.lengthText?.simpleText ?? null;
+
+      // Thumbnail: pick highest quality from YouTube CDN
+      const thumb = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+
+      videos.push({
+        id: videoId,
+        title,
+        thumb,
+        publishedAt,
+        timeText,
+        views,
+        dur,
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+      });
+    }
+
+    return videos.length ? videos : null;
+  } catch(e) {
+    console.warn('parseYtInitialData error:', e.message);
+    return null;
+  }
+}
+
+// Deep-search for videoRenderer objects
+function findVideoRenderers(obj, found = []) {
+  if (!obj || typeof obj !== 'object') return found;
+  if (obj.videoRenderer || obj.gridVideoRenderer) {
+    found.push(obj.videoRenderer ? { videoRenderer: obj.videoRenderer } : { gridVideoRenderer: obj.gridVideoRenderer });
+    return found;
+  }
+  if (found.length >= 50) return found; // cap
+  for (const k of Object.keys(obj)) {
+    findVideoRenderers(obj[k], found);
+    if (found.length >= 50) break;
+  }
+  return found;
+}
+
+// Parse "3 days ago", "2 weeks ago", "1 month ago", "스트리밍 시작 1일 전" etc.
+function parseRelativeTime(text, now) {
+  if (!text) return new Date(now - 30 * 86400_000); // default 30 days
+
+  const t = text.toLowerCase();
+  const num = parseInt(t.match(/\d+/)?.[0] || '1');
+
+  if (/second|초/.test(t))  return new Date(now - num * 1000);
+  if (/minute|분/.test(t))  return new Date(now - num * 60_000);
+  if (/hour|시간/.test(t))  return new Date(now - num * 3600_000);
+  if (/day|일/.test(t))     return new Date(now - num * 86400_000);
+  if (/week|주/.test(t))    return new Date(now - num * 7 * 86400_000);
+  if (/month|개월/.test(t)) return new Date(now - num * 30 * 86400_000);
+  if (/year|년/.test(t))    return new Date(now - num * 365 * 86400_000);
+
+  return new Date(now - 30 * 86400_000);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Method 2: YouTube Data API v3
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function fetchYouTubeAPI(key) {
+  try {
+    // Search for channel
+    const sr = await jf(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=%40routeai&type=channel&maxResults=5&key=${key}`);
+    if (!sr?.items?.length) return null;
+    const channelId = sr.items[0].snippet.channelId;
+
+    // Get uploads playlist
+    const cd = await jf(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${key}`);
+    const uploadsId = cd.items[0].contentDetails.relatedPlaylists.uploads;
+
+    // Get playlist items
+    const pl = await jf(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${uploadsId}&maxResults=50&key=${key}`);
+    if (!pl?.items?.length) return null;
+
+    // Video details
+    const ids = pl.items.map(i => i.contentDetails.videoId).join(',');
+    const vd = await jf(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${ids}&key=${key}`);
+    const dm = {};
+    vd.items.forEach(v => dm[v.id] = v);
+
+    return pl.items.map(item => {
+      const vid = item.contentDetails.videoId;
+      const d = dm[vid] || {};
+      return {
+        id: vid,
+        title: item.snippet.title,
+        thumb: `https://i.ytimg.com/vi/${vid}/mqdefault.jpg`,
+        publishedAt: new Date(item.snippet.publishedAt),
+        timeText: '',
+        views: d.statistics?.viewCount ? +d.statistics.viewCount : null,
+        dur: d.contentDetails?.duration ? parseDur(d.contentDetails.duration) : null,
+        url: `https://www.youtube.com/watch?v=${vid}`,
+      };
+    });
+  } catch(e) {
+    console.warn('YT API error:', e.message);
+    return null;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Method 3: Invidious (fallback)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function fetchInvidious() {
+  const instances = [
+    'https://invidious.io.lol',
+    'https://invidious.privacydev.net',
+    'https://iv.datura.network',
+    'https://invidious.lunar.icu',
+    'https://inv.clip.cafe',
+    'https://invidious.fdn.fr',
+  ];
+  for (const base of instances) {
+    for (const h of ['@routeai', 'routeai']) {
+      try {
+        const res = await fetch(`${base}/api/v1/channels/${encodeURIComponent(h)}/videos`, {
+          signal: AbortSignal.timeout(6000),
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const vids = Array.isArray(data) ? data : data.videos;
+        if (!vids?.length) continue;
+        return vids.map(v => ({
+          id: v.videoId,
+          title: v.title,
+          thumb: `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`,
+          publishedAt: new Date(v.published * 1000),
+          timeText: '',
+          views: v.viewCount ?? null,
+          dur: v.lengthSeconds ? fmtSecs(v.lengthSeconds) : null,
+          url: `https://www.youtube.com/watch?v=${v.videoId}`,
+        }));
+      } catch(e) { /* try next */ }
+    }
+  }
+  return null;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Render
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function render(videos) {
+  const now  = new Date();
+  const d7   = new Date(now - 7  * 86400_000);
+  const d14  = new Date(now - 14 * 86400_000);
+
+  const w1 = [], w2 = [], old = [];
+  videos.forEach(v => {
+    if      (v.publishedAt >= d7)  w1.push(v);
+    else if (v.publishedAt >= d14) w2.push(v);
+    else                           old.push(v);
+  });
+
+  setTxt('cnt-all', videos.length);
+  setTxt('cnt-w1',  w1.length);
+  setTxt('cnt-w2',  w2.length);
+  setTxt('cnt-old', old.length);
+  setTxt('sc-w1',  `${w1.length}개`);
+  setTxt('sc-w2',  `${w2.length}개`);
+  setTxt('sc-old', `${old.length}개`);
+
+  fillGrid('grid-w1',  w1,  'w1',  now);
+  fillGrid('grid-w2',  w2,  'w2',  now);
+  fillGrid('grid-old', old, 'old', now);
+
+  show('content', true);
+}
+
+function fillGrid(id, videos, cat, now) {
+  const el = document.getElementById(id);
+  if (!videos.length) {
+    el.innerHTML = '<div class="empty">이 기간에 업로드된 동영상이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = videos.map(v => cardHTML(v, cat, now)).join('');
+}
+
+function cardHTML(v, cat, now) {
+  const isNew = (now - v.publishedAt) < 3 * 86400_000;
+  const when  = v.timeText || relDate(v.publishedAt, now);
+  const viewsTxt = v.views != null ? `👁 ${fmtN(v.views)}` : '';
+
+  return `
+<a class="card" href="${esc(v.url)}" target="_blank" rel="noopener">
+  <div class="thumb">
+    <img
+      src="${esc(v.thumb)}"
+      alt="${esc(v.title)}"
+      loading="lazy"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+    />
+    <div class="thumb-err">▶</div>
+    ${isNew ? '<span class="badge-new">NEW</span>' : ''}
+    ${v.dur ? `<span class="badge-dur">${esc(v.dur)}</span>` : ''}
+    <div class="play-wrap">
+      <div class="play-btn">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="card-title">${esc(v.title)}</div>
+    <div class="card-meta">
+      <span class="card-views">${viewsTxt}</span>
+      <span class="card-when w-${cat}">${when}</span>
+    </div>
+  </div>
+</a>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Filter
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function setFilter(el, f) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  if (f === 'all') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  document.getElementById(`sec-${f}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function tryWithKey() {
+  const k = document.getElementById('key-input').value.trim();
+  if (!k) return;
+  savedKey = k;
+  localStorage.setItem('yt_api_key', k);
+  loadVideos();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Helpers
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function show(id, on) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = on ? (id === 'loading' ? 'flex' : 'block') : 'none';
+}
+function setTxt(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+function showErr(msg) {
+  show('err-box', true);
+  setTxt('err-detail', msg);
+  if (savedKey) document.getElementById('key-input').value = savedKey;
+}
+async function jf(url) {
+  const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+function relDate(d, now) {
+  const mins  = Math.floor((now - d) / 60000);
+  const hours = Math.floor(mins / 60);
+  const days  = Math.floor(hours / 24);
+  if (mins < 60)  return `${mins}분 전`;
+  if (hours < 24) return `${hours}시간 전`;
+  if (days === 1) return '어제';
+  if (days < 7)   return `${days}일 전`;
+  if (days < 30)  return `${Math.floor(days/7)}주 전`;
+  return `${Math.floor(days/30)}개월 전`;
+}
+function fmtN(n) {
+  if (n >= 10000) return `${Math.floor(n/10000)}만`;
+  if (n >= 1000)  return `${(n/1000).toFixed(1)}천`;
+  return String(n);
+}
+function parseViews(t) {
+  if (!t) return null;
+  const m = t.replace(/,/g,'').match(/(\d+)/);
+  return m ? +m[1] : null;
+}
+function fmtSecs(s) {
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h) return `${h}:${pad(m)}:${pad(sec)}`;
+  return `${m}:${pad(sec)}`;
+}
+function parseDur(iso) {
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return null;
+  return fmtSecs((+m[1]||0)*3600 + (+m[2]||0)*60 + (+m[3]||0));
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Init
+loadVideos();
+</script>
+</body>
+</html>
