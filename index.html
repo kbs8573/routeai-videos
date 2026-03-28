@@ -3,832 +3,1369 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="light dark" />
-  <title>RouteAI 최근 동영상</title>
+  <meta name="color-scheme" content="dark" />
+  <title>RouteAI</title>
+  <meta name="theme-color" content="#141414" />
   <style>
     :root {
-      color-scheme: light dark;
-
-      /* ── Dark (기본) ── */
-      --bg:      #0f0f0f;
-      --surface: #1c1c1c;
-      --surface2:#282828;
-      --border:  #333333;
-      --text:    #f0f0f0;
-      --muted:   #999999;
-      --header:  #111111;
-      --card-title: #f0f0f0;
-
-      --w1-bg:   rgba(34,197,94,.08);  --w1-border: rgba(34,197,94,.25);  --w1-color: #4ade80;
-      --w2-bg:   rgba(251,191,36,.08); --w2-border: rgba(251,191,36,.25); --w2-color: #fbbf24;
-      --old-bg:  rgba(148,163,184,.08);--old-border:rgba(148,163,184,.25);--old-color:#94a3b8;
-
-      --chip-all-bg: rgba(255,68,68,.15);  --chip-all-color: #ff6b6b;
-      --chip-w1-bg:  rgba(34,197,94,.15);  --chip-w1-color:  #4ade80;
-      --chip-w2-bg:  rgba(251,191,36,.15); --chip-w2-color:  #fbbf24;
-      --chip-old-bg: rgba(148,163,184,.15);--chip-old-color: #94a3b8;
-
-      --err-bg:     rgba(255,68,68,.08);
-      --err-border: rgba(255,68,68,.3);
+      color-scheme: dark;
+      --bg:       #141414;
+      --surface:  #1f1f1f;
+      --surface2: #2a2a2a;
+      --border:   #333;
+      --text:     #e5e5e5;
+      --muted:    #777;
+      --header:   #000;
       --spinner-track: #333;
+
+      --c0: #4ade80; --c0-bg: rgba(74,222,128,.12);  --c0-bd: rgba(74,222,128,.3);
+      --c1: #60a5fa; --c1-bg: rgba(96,165,250,.12);  --c1-bd: rgba(96,165,250,.3);
+      --c2: #f472b6; --c2-bg: rgba(244,114,182,.12); --c2-bd: rgba(244,114,182,.3);
+      --c3: #fb923c; --c3-bg: rgba(251,146,60,.12);  --c3-bd: rgba(251,146,60,.3);
+      --c4: #a1a1aa; --c4-bg: rgba(161,161,170,.1);  --c4-bd: rgba(161,161,170,.3);
+
+      --v-w: 258px;
+      --s-w: 145px;
     }
 
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg:      #f5f5f5;
-        --surface: #ffffff;
-        --surface2:#f0f0f0;
-        --border:  #e0e0e0;
-        --text:    #111111;
-        --muted:   #666666;
-        --header:  #ffffff;
-        --card-title: #111111;
-
-        --w1-bg:   rgba(22,163,74,.08);  --w1-border: rgba(22,163,74,.3);   --w1-color: #16a34a;
-        --w2-bg:   rgba(202,138,4,.08);  --w2-border: rgba(202,138,4,.3);   --w2-color: #b45309;
-        --old-bg:  rgba(100,116,139,.08);--old-border:rgba(100,116,139,.3); --old-color:#475569;
-
-        --chip-all-bg: rgba(220,38,38,.1);   --chip-all-color: #dc2626;
-        --chip-w1-bg:  rgba(22,163,74,.1);   --chip-w1-color:  #16a34a;
-        --chip-w2-bg:  rgba(202,138,4,.1);   --chip-w2-color:  #b45309;
-        --chip-old-bg: rgba(100,116,139,.1); --chip-old-color: #475569;
-
-        --err-bg:     rgba(220,38,38,.06);
-        --err-border: rgba(220,38,38,.25);
-        --spinner-track: #e0e0e0;
-      }
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
+    body { background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
-    }
+      overflow-x: hidden; }
 
-    /* ── Header ── */
-    header {
-      background: var(--header);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 28px;
-      display: flex; align-items: center; gap: 14px;
-      position: sticky; top: 0; z-index: 10;
-    }
-    .avatar {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: linear-gradient(135deg, #ff4444, #ff8c00);
+    /* ── Intro overlay ── */
+    #intro-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #000;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 800; color: #fff; flex-shrink: 0;
+      transition: opacity .6s ease;
     }
-    header h1 { font-size: 19px; font-weight: 700; }
-    header p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
-    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-    .upd-time  { font-size: 12px; color: var(--muted); }
+    #intro-overlay iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
+    #intro-tl-cover { position: absolute; top: 0; left: 0; width: 220px; height: 50px; background: #000; z-index: 1; }
+    #intro-progress {
+      position: absolute; bottom: 0; left: 0; height: 3px; background: #e50914;
+      animation: progress-bar 3s linear forwards;
+    }
+    @keyframes progress-bar { from { width: 0 } to { width: 100% } }
+    #intro-unmute {
+      position: absolute; bottom: 20px; left: 20px;
+      color: #fff; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.3);
+      border-radius: 50%; width: 44px; height: 44px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: background .15s;
+    }
+    #intro-unmute:hover { background: rgba(229,9,20,.8); border-color: #e50914; }
+    #intro-skip {
+      position: absolute; bottom: 20px; right: 20px;
+      color: rgba(255,255,255,.65); font-size: 13px; cursor: pointer;
+      background: rgba(0,0,0,.55); padding: 7px 16px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.2); transition: color .15s, border-color .15s;
+    }
+    #intro-skip:hover { color: #fff; border-color: rgba(255,255,255,.5); }
+
+    /* ── Netflix Nav ── */
+    #nf-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 4%;
+      background: linear-gradient(to bottom, rgba(0,0,0,.9) 0%, transparent 100%);
+      transition: background .4s;
+    }
+    #nf-nav.solid { background: #141414; }
+    .nf-logo {
+      display: flex; flex-direction: column; justify-content: center;
+      cursor: default; user-select: none; line-height: 1;
+    }
+    .nf-logo-main {
+      font-size: 24px; font-weight: 900; letter-spacing: -1px;
+      color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6);
+    }
+    .nf-nav-right { display: flex; align-items: center; gap: 12px; }
+    .upd-time { font-size: 11px; color: rgba(255,255,255,.4); }
     .btn-refresh {
-      background: var(--surface2); border: 1px solid var(--border);
-      color: var(--text); padding: 7px 14px; border-radius: 8px;
-      cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;
-      transition: background .2s, color .2s, border-color .2s;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18);
+      color: rgba(255,255,255,.85); width: 36px; height: 36px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s, transform .3s; flex-shrink: 0;
     }
-    .btn-refresh:hover { background: #ff4444; border-color: #ff4444; color: #fff; }
+    .btn-refresh:hover { background: #e50914; border-color: #e50914; color: #fff; }
+    .btn-refresh:active { transform: rotate(180deg); }
 
-    /* ── Main ── */
-    main { max-width: 1380px; margin: 0 auto; padding: 28px 20px; }
+    /* ── Hero ── */
+    #hero {
+      position: relative; width: 100%; height: 85vh; min-height: 520px;
+      overflow: hidden; background: #000;
+    }
+    #hero-thumb {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center top;
+      transition: opacity 1s ease;
+    }
+    #hero-iframe {
+      position: absolute;
+      top: -60px; left: -10%;
+      width: 120%; height: calc(100% + 120px);
+      border: none; pointer-events: none;
+      transition: opacity 1s ease;
+    }
+    #hero-gradient {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(to right, rgba(0,0,0,.75) 0%, rgba(0,0,0,.25) 55%, transparent 100%),
+        linear-gradient(to top, #141414 0%, rgba(20,20,20,.65) 22%, transparent 55%);
+    }
+    #hero-info {
+      position: absolute; bottom: 30%; left: 4%; max-width: 44%;
+    }
+    #hero-ch-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,.55); margin-bottom: 14px;
+    }
+    #hero-title {
+      font-size: clamp(22px, 3.4vw, 52px); font-weight: 900; line-height: 1.15;
+      color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.7);
+      margin-bottom: 24px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    #hero-btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .h-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 26px; border-radius: 4px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      border: none; text-decoration: none; transition: opacity .2s;
+    }
+    .h-btn-play { background: #fff; color: #000; }
+    .h-btn-play:hover { opacity: .85; }
+    .h-btn-more { background: rgba(109,109,110,.7); color: #fff; }
+    .h-btn-more:hover { background: rgba(109,109,110,.5); }
+    #hero-mute {
+      position: absolute; bottom: 30%; right: 4%;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: transparent; border: 2px solid rgba(255,255,255,.6);
+      color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s, background .2s;
+    }
+    #hero-mute:hover { border-color: #fff; background: rgba(255,255,255,.15); }
+    #hero-replay {
+      position: absolute; bottom: 30%; right: 4%;
+      padding: 8px 18px; border-radius: 4px;
+      background: rgba(0,0,0,.6); border: 2px solid rgba(255,255,255,.5);
+      color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+      display: none; transition: background .2s;
+    }
+    #hero-replay:hover { background: rgba(255,255,255,.15); }
 
-    /* ── Filter bar ── */
-    .filter-bar { display: flex; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
+    /* ── Sub-header info ── */
+    .sub-info {
+      background: var(--header); border-bottom: 1px solid var(--border);
+      padding: 8px 24px; display: flex; align-items: center; gap: 10px;
+    }
+    .sub-info span { font-size: 12px; color: var(--muted); }
+
+    /* ── Filter chips ── */
+    .filter-bar {
+      background: var(--header); border-bottom: 1px solid var(--border);
+      display: flex; gap: 8px; padding: 12px 24px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
     .chip {
-      padding: 8px 18px; border-radius: 100px;
-      font-size: 13px; font-weight: 600;
-      cursor: pointer; border: 2px solid transparent;
-      transition: all .15s; display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 100px; white-space: nowrap;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      border: 2px solid transparent; transition: all .15s;
+      display: flex; align-items: center; gap: 5px; flex-shrink: 0;
       user-select: none;
     }
-    .chip .cnt { background: rgba(255,255,255,.18); border-radius: 100px; padding: 1px 7px; font-size: 11px; }
-    .c-all { background: var(--chip-all-bg); color: var(--chip-all-color); }
-    .c-w1  { background: var(--chip-w1-bg);  color: var(--chip-w1-color); }
-    .c-w2  { background: var(--chip-w2-bg);  color: var(--chip-w2-color); }
-    .c-old { background: var(--chip-old-bg); color: var(--chip-old-color); }
+    .chip .cnt { background: rgba(255,255,255,.18); border-radius: 100px; padding: 1px 6px; font-size: 10px; }
     .chip.active { border-color: currentColor; }
+    .c-all   { background: rgba(229,9,20,.15);   color: #e50914; }
+    .c-live  { background: rgba(220,38,38,.15);  color: #f87171; }
+    .c-video { background: rgba(96,165,250,.15); color: #60a5fa; }
+    .c-short { background: rgba(251,146,60,.15); color: #fb923c; }
 
-    /* ── Section ── */
-    .section { margin-bottom: 48px; }
-    .sec-head {
-      display: flex; align-items: center; gap: 12px;
-      padding: 14px 20px; border-radius: 12px; margin-bottom: 20px;
+    /* ── Main ── */
+    main { padding: 4px 0 60px; }
+
+    /* ── Time section ── */
+    .t-section { margin-bottom: 8px; }
+    .t-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 36px 24px 10px;
     }
-    .h-w1  { background: var(--w1-bg);  border: 1px solid var(--w1-border); }
-    .h-w2  { background: var(--w2-bg);  border: 1px solid var(--w2-border); }
-    .h-old { background: var(--old-bg); border: 1px solid var(--old-border); }
-    .sec-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .h-w1 .sec-dot  { background: var(--w1-color);  box-shadow: 0 0 6px var(--w1-color); }
-    .h-w2 .sec-dot  { background: var(--w2-color);  box-shadow: 0 0 6px var(--w2-color); }
-    .h-old .sec-dot { background: var(--old-color); }
-    .sec-name { font-size: 17px; font-weight: 800; }
-    .h-w1 .sec-name  { color: var(--w1-color); }
-    .h-w2 .sec-name  { color: var(--w2-color); }
-    .h-old .sec-name { color: var(--old-color); }
-    .sec-cnt {
-      font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 100px;
+    .t-head-left { display: flex; align-items: center; gap: 10px; }
+    .t-dot { display: none; }
+    .t-name {
+      font-size: 22px; font-weight: 700; color: #e5e5e5;
+      letter-spacing: -.4px;
     }
-    .h-w1 .sec-cnt  { background: var(--w1-bg);  color: var(--w1-color); }
-    .h-w2 .sec-cnt  { background: var(--w2-bg);  color: var(--w2-color); }
-    .h-old .sec-cnt { background: var(--old-bg); color: var(--old-color); }
-    .sec-desc { margin-left: auto; font-size: 12px; color: var(--muted); }
+    .t-badge {
+      font-size: 10px; font-weight: 800; letter-spacing: .7px;
+      text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+      align-self: center; line-height: 1;
+    }
+    .ts-0 .t-badge { background: rgba(74,222,128,.12);  color: var(--c0); border: 1px solid rgba(74,222,128,.25); }
+    .ts-1 .t-badge { background: rgba(96,165,250,.12);  color: var(--c1); border: 1px solid rgba(96,165,250,.25); }
+    .ts-3 .t-badge { background: rgba(251,146,60,.12);  color: var(--c3); border: 1px solid rgba(251,146,60,.25); }
+    .ts-4 .t-badge { background: rgba(161,161,170,.12); color: var(--c4); border: 1px solid rgba(161,161,170,.25); }
+    .t-cnt { font-size: 13px; color: var(--muted); }
+    .t-divider { display: none; }
 
-    /* ── Grid ── */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    /* ── Rail wrapper ── */
+    .rail-wrap { position: relative; margin-bottom: 2px; }
+    .rail-label {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 24px 6px; font-size: 12px; color: var(--muted);
+    }
+    .rl-badge {
+      font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 4px;
+    }
+    .rl-live  { background: rgba(220,38,38,.25);  color: #f87171; }
+    .rl-video { background: rgba(59,130,246,.2);  color: #60a5fa; }
+    .rl-short { background: rgba(251,146,60,.2);  color: #fb923c; }
 
-    /* ── Card ── */
+    /* ── Rail (horizontal scroll) ── */
+    .rail {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 12px;
+      padding: 4px 24px 16px;
+      overflow-x: auto;
+      overflow-y: visible;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+    .rail::-webkit-scrollbar { height: 4px; }
+    .rail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Arrow buttons ── */
+    .arr {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer; z-index: 5;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+      transition: background .15s, opacity .2s;
+    }
+    .arr:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+    .arr.hidden { opacity: 0; pointer-events: none; }
+    .arr-l { left: 4px; }
+    .arr-r { right: 4px; }
+    .arr svg { width: 16px; height: 16px; }
+
+    /* ── Cards ── */
     .card {
+      flex: 0 0 auto;
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 12px; overflow: hidden;
-      text-decoration: none; color: inherit; display: block;
-      transition: transform .2s, box-shadow .2s, border-color .2s;
+      border-radius: 10px; overflow: hidden;
+      text-decoration: none; color: inherit;
+      transition: transform .2s, box-shadow .2s;
     }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,.2); border-color: var(--muted); }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
 
-    .thumb { position: relative; aspect-ratio: 16/9; background: var(--surface2); overflow: hidden; }
-    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
-    .card:hover .thumb img { transform: scale(1.04); }
+    .card-v { width: var(--v-w); }
+    .card-v .thumb { aspect-ratio: 16/9; }
+    .card-s { width: var(--s-w); }
+    .card-s .thumb { height: 240px; }
 
+    .thumb {
+      position: relative; background: var(--surface2); overflow: hidden;
+    }
+    .thumb img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform .3s;
+    }
+    .card:hover .thumb img { transform: scale(1.05); }
     .thumb-err {
-      position: absolute; inset: 0;
-      display: none; align-items: center; justify-content: center;
-      background: var(--surface2); color: var(--border); font-size: 36px;
+      position: absolute; inset: 0; display: none;
+      align-items: center; justify-content: center;
+      background: var(--surface2); color: var(--border); font-size: 26px;
     }
 
-    .badge-new {
-      position: absolute; top: 8px; left: 8px;
-      background: #ff4444; color: #fff;
-      font-size: 10px; font-weight: 800; padding: 3px 7px; border-radius: 4px;
+    .badge {
+      position: absolute; font-size: 10px; font-weight: 800;
+      padding: 2px 6px; border-radius: 4px; letter-spacing: .3px;
     }
-    .badge-dur {
-      position: absolute; bottom: 8px; right: 8px;
-      background: rgba(0,0,0,.85); color: #fff;
-      font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px;
-    }
+    .badge-new  { top: 6px; right: 6px;   background: #2563eb; color: #fff; }
+    .badge-live { top: 6px; left: 6px;   background: #dc2626; color: #fff; }
+    .badge-when { bottom: 6px; left: 6px; background: rgba(0,0,0,.78); color: #fff; border-radius: 4px; }
+
     .play-wrap {
-      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
       transition: background .2s;
     }
-    .card:hover .play-wrap { background: rgba(0,0,0,.28); }
+    .card:hover .play-wrap { background: rgba(0,0,0,.25); }
     .play-btn {
-      width: 48px; height: 48px; background: rgba(255,255,255,.9); border-radius: 50%;
+      width: 38px; height: 38px; background: rgba(255,255,255,.88); border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       opacity: 0; transform: scale(.8); transition: all .2s;
     }
-    .play-btn svg { width: 18px; height: 18px; fill: #111; margin-left: 3px; }
+    .play-btn svg { width: 15px; height: 15px; fill: #111; margin-left: 3px; }
     .card:hover .play-btn { opacity: 1; transform: scale(1); }
 
-    .card-body { padding: 12px 14px 14px; }
+    .card-body { padding: 8px 10px 10px; }
     .card-title {
-      font-size: 13.5px; font-weight: 600; line-height: 1.45;
+      font-size: 12.5px; font-weight: 600; line-height: 1.4; color: var(--text);
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden; margin-bottom: 10px; color: var(--card-title);
+      overflow: hidden; margin-bottom: 5px;
     }
-    .card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .card-views { font-size: 12px; color: var(--muted); }
-    .card-when { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
-    .w-w1  { background: var(--w1-bg);  color: var(--w1-color); }
-    .w-w2  { background: var(--w2-bg);  color: var(--w2-color); }
-    .w-old { background: var(--old-bg); color: var(--old-color); }
+    .card-views { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
-    /* ── Status states ── */
-    .empty { grid-column: 1/-1; padding: 40px; text-align: center; color: var(--muted); font-size: 14px; }
+    /* ── Load-more (지난주 이상) ── */
+    .load-more-card {
+      flex: 0 0 auto; width: var(--v-w);
+      background: var(--surface2); border: 1px dashed var(--border);
+      border-radius: 10px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; color: var(--muted); text-decoration: none;
+      transition: border-color .2s, color .2s;
+      min-height: 160px;
+    }
+    .load-more-card.short-size { width: var(--s-w); min-height: 240px; }
+    .load-more-card:hover { border-color: #ef4444; color: #ef4444; }
+    .load-more-card svg { width: 28px; height: 28px; }
+    .load-more-card span { font-size: 12px; font-weight: 600; }
 
+    /* ── Video detail modal (Netflix style) ── */
+    #vd-overlay {
+      position: fixed; inset: 0; z-index: 8500;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      animation: fadeIn .2s ease;
+    }
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+    #vd-modal {
+      background: #181818; border-radius: 10px;
+      width: 100%; max-width: 860px;
+      max-height: 90vh; overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,.8);
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { transform:translateY(30px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+    #vd-close {
+      position: absolute; top: 14px; right: 14px; z-index: 2;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #181818; border: none; color: #fff;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    #vd-close:hover { background: #333; }
+    #vd-video-wrap {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      background: #000; border-radius: 10px 10px 0 0; overflow: hidden;
+    }
+    #vd-video-wrap iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+    }
+    #vd-video-grad {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 35%;
+      background: linear-gradient(to top, #181818 0%, transparent 100%);
+      pointer-events: none;
+    }
+    #vd-replay {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      padding: 10px 24px; border-radius: 4px; z-index: 2;
+      background: rgba(0,0,0,.65); border: 2px solid rgba(255,255,255,.55);
+      color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background .2s; white-space: nowrap;
+    }
+    #vd-replay:hover { background: rgba(255,255,255,.18); }
+    #vd-body { padding: 20px 28px 28px; }
+    #vd-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    #vd-ch {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,.5);
+    }
+    #vd-title {
+      font-size: clamp(16px, 2.2vw, 24px); font-weight: 800;
+      color: #fff; line-height: 1.3; margin-bottom: 18px;
+    }
+    #vd-actions { display: flex; gap: 10px; }
+    #vd-yt-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 4px;
+      background: #e50914; color: #fff;
+      font-size: 14px; font-weight: 700;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: background .2s;
+    }
+    #vd-yt-btn:hover { background: #c0000f; }
+    #vd-unmute {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 4px;
+      background: rgba(109,109,110,.7); color: #fff;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      border: none; transition: background .2s;
+    }
+    #vd-unmute:hover { background: rgba(109,109,110,.5); }
+    #vd-unmute.on svg.ico-mute { display: none; }
+    #vd-unmute:not(.on) svg.ico-sound { display: none; }
+    @media (max-width: 640px) {
+      .vd-btn-text { white-space: nowrap; }
+      #vd-unmute, #vd-yt-btn { padding: 10px 14px; font-size: 13px; }
+    }
+
+    /* ── YouTube redirect popup ── */
+    #yt-popup-overlay {
+      position: fixed; inset: 0; z-index: 8000;
+      background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #yt-popup {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 32px 28px 24px;
+      max-width: 380px; width: 90%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    #yt-popup .yt-popup-icon { font-size: 36px; margin-bottom: 14px; }
+    #yt-popup p {
+      color: var(--text); font-size: 14px; line-height: 1.7;
+      margin: 0 0 24px;
+    }
+    .yt-popup-btns { display: flex; flex-direction: column; gap: 10px; }
+    .yt-popup-btns a {
+      display: block; padding: 11px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      transition: background .2s, opacity .2s;
+    }
+    .yt-popup-btns a.btn-ch1 { background: #e50914; color: #fff; }
+    .yt-popup-btns a.btn-ch1:hover { background: #c0000f; }
+    .yt-popup-btns button {
+      padding: 10px 20px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      background: var(--surface2); color: var(--muted);
+      border: 1px solid var(--border); transition: background .2s, color .2s;
+    }
+    .yt-popup-btns button:hover { background: var(--border); color: var(--text); }
+
+    /* ── States ── */
     #loading {
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 100px 24px; gap: 18px;
+      justify-content: center; padding: 100px 24px; gap: 16px;
     }
     .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid var(--spinner-track); border-top-color: #ff4444;
+      width: 36px; height: 36px;
+      border: 3px solid var(--spinner-track); border-top-color: #ef4444;
       border-radius: 50%; animation: spin .75s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     #loading p { color: var(--muted); font-size: 14px; }
-    #loading small { color: #555; font-size: 12px; }
 
-    #err-box {
-      display: none;
-      background: var(--err-bg); border: 1px solid var(--err-border);
-      border-radius: 12px; padding: 24px; margin-bottom: 24px;
+    #err-msg {
+      display: none; margin: 24px; padding: 20px;
+      background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+      border-radius: 10px; color: var(--muted); font-size: 13px;
     }
-    #err-box h3 { color: #ff6b6b; margin-bottom: 8px; font-size: 15px; }
-    #err-box p  { color: var(--muted); font-size: 13px; line-height: 1.6; }
-    .api-box { margin-top: 16px; padding: 14px; background: var(--surface2); border-radius: 8px; }
-    .api-box strong { font-size: 13px; display: block; margin-bottom: 4px; }
-    .api-box small  { color: var(--muted); font-size: 12px; }
-    .api-box small a { color: #ff6b6b; }
-    .api-box input {
-      background: var(--bg); border: 1px solid var(--border);
-      color: var(--text); padding: 8px 12px; border-radius: 6px;
-      font-size: 13px; width: 100%; margin-top: 8px; font-family: monospace;
-    }
-    .api-btn {
-      margin-top: 8px; background: #ff4444; color: #fff;
-      border: none; padding: 9px 16px; border-radius: 6px;
-      cursor: pointer; font-size: 13px; font-weight: 600; width: 100%;
-    }
-    .api-btn:hover { background: #cc2222; }
-
     #content { display: none; }
 
-    @media (max-width: 600px) {
-      header { padding: 12px 16px; }
-      main   { padding: 18px 12px; }
-      .grid  { grid-template-columns: 1fr; }
+    @media (min-width: 641px) and (max-width: 1024px) {
+      #hero { height: 60vh; min-height: 340px; }
+      #hero-info { max-width: 60%; }
+    }
+    @media (max-width: 640px) {
+      :root { --v-w: 210px; --s-w: 128px; }
+      #hero { height: 60vh; min-height: 300px; }
+      #hero-info { bottom: 16%; left: 4%; max-width: 82%; }
+      #hero-title { margin-bottom: 14px; }
+      .h-btn { font-size: 13px; padding: 8px 18px; }
+      #hero-mute, #hero-replay { bottom: 16%; }
+      .filter-bar, .rail { padding-left: 14px; padding-right: 14px; }
+      .t-head { padding: 16px 14px 8px; }
+      .rail-label { padding-left: 14px; }
+      .card-s .thumb { height: 200px; }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="avatar">R</div>
-  <div>
-    <h1>RouteAI 최근 동영상</h1>
-    <p id="sub-text">@routeai · 불러오는 중…</p>
+<!-- ── Intro Overlay ── -->
+<div id="intro-overlay">
+  <iframe id="intro-iframe"
+    src="https://www.youtube.com/embed/0JyWrRmsjss?start=34&autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1"
+    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <div id="intro-tl-cover"></div>
+  <div id="intro-progress"></div>
+  <button id="intro-unmute" onclick="introToggleMute()" title="소리 켜기">
+    <svg id="ico-mute" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.5 12A4.5 4.5 0 0 0 14 8v2.18l2.45 2.45c.05-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0 0 17.73 19l1.98 2L21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+    </svg>
+    <svg id="ico-sound" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.23v2.06A6.5 6.5 0 0 1 14 20.71v2.06c3.88-.99 6.71-4.53 6.71-8.77S17.88 4.22 14 3.23z"/>
+    </svg>
+  </button>
+  <div id="intro-skip" onclick="dismissIntro()">건너뛰기 ›</div>
+</div>
+
+<!-- ── Netflix Nav ── -->
+<nav id="nf-nav">
+  <div class="nf-logo">
+    <span class="nf-logo-main">RouteAI</span>
   </div>
-  <div class="hdr-right">
+  <div class="nf-nav-right">
     <span class="upd-time" id="upd-time"></span>
-    <button class="btn-refresh" onclick="loadVideos()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <button class="btn-refresh" onclick="loadVideos()" title="새로고침">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"/>
         <polyline points="1 20 1 14 7 14"/>
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
       </svg>
-      새로고침
     </button>
   </div>
-</header>
+</nav>
 
-<main>
-  <div id="loading">
-    <div class="spinner"></div>
-    <p id="load-msg">YouTube 채널 데이터 불러오는 중…</p>
-    <small id="load-detail"></small>
-  </div>
+<!-- ── Hero ── -->
+<section id="hero">
+  <div id="hero-thumb"></div>
 
-  <div id="err-box">
-    <h3>⚠️ 동영상을 불러올 수 없습니다</h3>
-    <p id="err-detail">오류가 발생했습니다.</p>
-    <div class="api-box">
-      <strong>YouTube Data API v3 키 입력 (가장 안정적)</strong>
-      <small>
-        <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank">
-          Google Cloud Console
-        </a>에서 무료 발급 가능합니다.
-      </small>
-      <input type="text" id="key-input" placeholder="AIza…" />
-      <button class="api-btn" onclick="tryWithKey()">API 키로 불러오기</button>
+  <div id="hero-gradient"></div>
+  <div id="hero-info">
+    <div id="hero-ch-label"></div>
+    <h1 id="hero-title"></h1>
+    <div id="hero-btns">
+      <a id="hero-play-btn" class="h-btn h-btn-play" href="#" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        재생
+      </a>
+      <button class="h-btn h-btn-more" onclick="showVideoModal(window._heroVideo)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        자세히 보기
+      </button>
     </div>
   </div>
+  <button id="hero-mute" onclick="heroToggleMute()" title="음소거 해제">
+    <svg id="hero-ico-mute" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.5 12A4.5 4.5 0 0 0 14 8v2.18l2.45 2.45c.05-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0 0 17.73 19l1.98 2L21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+    </svg>
+    <svg id="hero-ico-sound" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.23v2.06A6.5 6.5 0 0 1 14 20.71v2.06c3.88-.99 6.71-4.53 6.71-8.77S17.88 4.22 14 3.23z"/>
+    </svg>
+  </button>
+  <button id="hero-replay" onclick="heroReplay()">↺ 다시 보기</button>
+</section>
 
-  <div id="content">
-    <div class="filter-bar">
-      <div class="chip c-all active" onclick="setFilter(this,'all')">🎬 전체 <span class="cnt" id="cnt-all">0</span></div>
-      <div class="chip c-w1"  onclick="setFilter(this,'w1')">🔥 지난 1주 <span class="cnt" id="cnt-w1">0</span></div>
-      <div class="chip c-w2"  onclick="setFilter(this,'w2')">📅 지난 2주 <span class="cnt" id="cnt-w2">0</span></div>
-      <div class="chip c-old" onclick="setFilter(this,'old')">🗂 2주 이상 <span class="cnt" id="cnt-old">0</span></div>
-    </div>
-
-    <div class="section" id="sec-w1">
-      <div class="sec-head h-w1">
-        <span class="sec-dot"></span>
-        <span class="sec-name">지난 1주</span>
-        <span class="sec-cnt" id="sc-w1">0개</span>
-        <span class="sec-desc">최근 7일 이내 업로드</span>
-      </div>
-      <div class="grid" id="grid-w1"></div>
-    </div>
-
-    <div class="section" id="sec-w2">
-      <div class="sec-head h-w2">
-        <span class="sec-dot"></span>
-        <span class="sec-name">지난 2주</span>
-        <span class="sec-cnt" id="sc-w2">0개</span>
-        <span class="sec-desc">7~14일 전 업로드</span>
-      </div>
-      <div class="grid" id="grid-w2"></div>
-    </div>
-
-    <div class="section" id="sec-old">
-      <div class="sec-head h-old">
-        <span class="sec-dot"></span>
-        <span class="sec-name">2주 이상</span>
-        <span class="sec-cnt" id="sc-old">0개</span>
-        <span class="sec-desc">14일 이전 업로드</span>
-      </div>
-      <div class="grid" id="grid-old"></div>
-    </div>
+<!-- ── Sub info + Filter ── -->
+<div id="content">
+  <div class="sub-info">
+    <span id="sub-text">불러오는 중…</span>
   </div>
-</main>
+  <div class="filter-bar">
+    <div class="chip c-all active" onclick="setFilter(this,'all')">📺 전체 <span class="cnt" id="cnt-all">0</span></div>
+    <div class="chip c-live"  onclick="setFilter(this,'live')">🔴 라이브 <span class="cnt" id="cnt-live">0</span></div>
+    <div class="chip c-video" onclick="setFilter(this,'video')">▶ 동영상 <span class="cnt" id="cnt-video">0</span></div>
+    <div class="chip c-short" onclick="setFilter(this,'short')">⚡ Shorts <span class="cnt" id="cnt-short">0</span></div>
+  </div>
+  <main id="main-content"></main>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>영상 데이터 불러오는 중…</p>
+</div>
+<div id="err-msg">영상 데이터를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Config
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const YT_CHANNEL_URL = 'https://www.youtube.com/@routeai/videos';
-
-// Multiple CORS proxies tried in parallel — fastest/working one wins
-const CORS_PROXIES = [
+history.scrollRestoration = 'manual';  // 새로고침 시 항상 최상단에서 시작
+const YT_URL = 'https://www.youtube.com/@routeai/videos';
+const PROXIES = [
   u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-  u => `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(u)}`,
 ];
 
-let savedKey = localStorage.getItem('yt_api_key') || '';
+const CATS = [
+  { id:0, label:'오늘',        badge:'TODAY',     cls:'ts-0' },
+  { id:1, label:'어제',        badge:'YESTERDAY', cls:'ts-1' },
+  { id:2, label:'이번 주',     badge:'THIS WEEK', cls:'ts-3' },
+  { id:3, label:'일주일 이상 지난 영상들', badge:'OLDER', cls:'ts-4' },
+];
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Main
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 지난주 이상: 처음 3개만, 이후 lazy load
+const LAZY_CAT   = 3;
+const LAZY_INIT  = 3;
+const LAZY_BATCH = 7;
+
+// lazy store: { live: [...], video: [...], short: [...] }
+const lazyStore  = { live: [], video: [], short: [] };
+const lazyOffset = { live: 0, video: 0, short: 0 };
+
+function isLiveVideo(v) {
+  return v.type === 'live' || /\[?LIVE\]?|라이브/i.test(v.title);
+}
+
+function pickHeroVideo(videos) {
+  const now = Date.now();
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+
+  // 1. 현재 라이브 중: type=live + 4시간 이내 업로드
+  const currentLive = videos.find(v =>
+    isLiveVideo(v) && (now - new Date(v.publishedAt).getTime()) < 4 * 3600_000
+  );
+  if (currentLive) return currentLive;
+
+  // 2. 후보 풀 (랜덤)
+  const todayVids = videos.filter(v => new Date(v.publishedAt) >= todayStart);
+
+  const todayLive     = todayVids.find(v => isLiveVideo(v));                           // 오늘 라이브
+  const mostViewed    = [...videos].sort((a, b) => (b.views||0) - (a.views||0))[0];   // 누적 최다 조회수
+  const mostRecent    = videos[0];                                                      // 가장 최근 영상
+  const todayTopView  = [...todayVids].sort((a, b) => (b.views||0) - (a.views||0))[0]; // 오늘 최다 조회수
+
+  const pool = [...new Set([todayLive, mostViewed, mostRecent, todayTopView].filter(Boolean))];
+  return pool[Math.floor(Math.random() * pool.length)] || videos[0];
+}
+
+function getBucket(pub) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const ago = n => new Date(+today - n * 86400_000);
+  if (pub >= today)  return 0;
+  if (pub >= ago(1)) return 1;
+  if (pub >= ago(7)) return 2;  // 이번 주 (2~7일 전, 3일 전 포함)
+  return 3;
+}
+
+// ── Load ─────────────────────────────────────────────────
 async function loadVideos() {
   show('loading', true);
-  show('err-box', false);
   show('content', false);
-  setTxt('load-msg', '동영상 데이터 불러오는 중…');
-  setTxt('load-detail', '');
+  show('err-msg', false);
 
-  // ── Step 1: data.json 즉시 표시 ─────────────────────────
   const fromJson = await fetchDataJson();
   if (fromJson?.videos?.length) {
     show('loading', false);
     render(fromJson.videos);
-    setTxt('sub-text', `@routeai · 동영상 ${fromJson.videos.length}개`);
-    setUpdTime(new Date().toISOString());
+    setTxt('sub-text', `영상 ${fromJson.videos.length}개`);
+    setTxt('upd-time', fmtTime(new Date()));
     return;
   }
-
-  // ── data.json 없을 때: CORS 프록시로 직접 가져오기 ──────
-  const videos = await fetchFresh();
+  const fresh = await scrapeYouTubePage();
   show('loading', false);
-
-  if (videos?.length) {
-    render(videos);
-    setTxt('sub-text', `@routeai · 동영상 ${videos.length}개`);
-    setUpdTime(new Date().toISOString());
+  if (fresh?.length) {
+    render(fresh);
+    setTxt('sub-text', `영상 ${fresh.length}개`);
+    setTxt('upd-time', fmtTime(new Date()));
   } else {
-    showErr('동영상 데이터를 가져오지 못했습니다. 잠시 후 새로고침하거나 YouTube API 키를 입력해 주세요.');
+    show('err-msg', true);
   }
 }
 
-// 직접 수집 (data.json 없을 때 최후 수단)
-async function fetchFresh() {
-  if (savedKey) {
-    const v = await fetchYouTubeAPI(savedKey);
-    if (v) return v;
-  }
-  const v2 = await scrapeYouTubePage();
-  if (v2) return v2;
-  return fetchInvidious();
-}
-
-function setUpdTime(isoStr) {
-  const d = new Date(isoStr);
-  const label = d.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  setTxt('upd-time', `업데이트: ${label}`);
-}
-
-// Fetch pre-built data.json (same origin, no CORS)
 async function fetchDataJson() {
   try {
     const r = await fetch('./data.json', { signal: AbortSignal.timeout(5000) });
     if (!r.ok) return null;
-    const data = await r.json();
-    if (!data.videos?.length) return null;
-    data.videos = data.videos.map(v => ({
+    const d = await r.json();
+    if (!d.videos?.length) return null;
+    d.videos = d.videos.map(v => ({
       ...v,
       publishedAt: new Date(v.publishedAt),
-      dur: null,
+      type: v.type || 'video',
+      channelLabel: v.channelLabel || 'RouteAI',
     }));
-    return data;
-  } catch(e) {
-    return null;
-  }
+    return d;
+  } catch { return null; }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Method 1: Scrape YouTube page (primary)
-// Tries all CORS proxies in parallel, uses first success
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function scrapeYouTubePage() {
-  // Race all proxies simultaneously — use whichever responds first with valid HTML
-  const html = await raceProxies(YT_CHANNEL_URL);
+  const html = await raceProxies(YT_URL);
   if (!html) return null;
   try {
-
-    // Extract ytInitialData JSON
-    let dataStr = null;
-    const patterns = [
-      /var ytInitialData\s*=\s*(\{.+?\});\s*(?:var|window|<\/script>)/s,
-      /ytInitialData\s*=\s*(\{.+?\});\s*(?:var|window|<\/script>)/s,
-      /"ytInitialData"\s*,\s*(\{.+?\})\)/s,
-    ];
-    for (const pat of patterns) {
-      const m = html.match(pat);
-      if (m) { dataStr = m[1]; break; }
+    const idx = html.indexOf('var ytInitialData = ');
+    if (idx < 0) return null;
+    const s = html.indexOf('{', idx);
+    let d = 0, i = s;
+    for (; i < html.length; i++) {
+      if (html[i] === '{') d++;
+      else if (html[i] === '}') { d--; if (!d) break; }
     }
-
-    if (!dataStr) {
-      // Brace-counting extraction
-      const startIdx = html.indexOf('var ytInitialData = ');
-      if (startIdx !== -1) {
-        const jsonStart = html.indexOf('{', startIdx);
-        let depth = 0, i = jsonStart;
-        for (; i < html.length; i++) {
-          if (html[i] === '{') depth++;
-          else if (html[i] === '}') { depth--; if (depth === 0) break; }
-        }
-        dataStr = html.slice(jsonStart, i + 1);
-      }
-    }
-
-    if (!dataStr) throw new Error('ytInitialData not found');
-    const data = JSON.parse(dataStr);
-    return parseYtInitialData(data);
-  } catch(e) {
-    console.warn('YouTube scrape failed:', e.message);
-    return null;
-  }
+    return parseYtData(JSON.parse(html.slice(s, i + 1)));
+  } catch { return null; }
 }
 
-// Race all CORS proxies — return first HTML that contains ytInitialData
-async function raceProxies(targetUrl) {
-  return new Promise(resolve => {
-    let done = false;
-    let pending = CORS_PROXIES.length;
-
-    CORS_PROXIES.forEach(mkProxy => {
-      const url = mkProxy(targetUrl);
-      fetch(url, { signal: AbortSignal.timeout(14000) })
+async function raceProxies(url) {
+  return new Promise(res => {
+    let done = false, pending = PROXIES.length;
+    PROXIES.forEach(mk => {
+      fetch(mk(url), { signal: AbortSignal.timeout(14000) })
         .then(async r => {
-          if (!r.ok) throw new Error(`${r.status}`);
-          const text = await r.text();
-          if (!text.includes('ytInitialData')) throw new Error('no ytInitialData');
-          if (!done) { done = true; resolve(text); }
+          const t = await r.text();
+          if (!t.includes('ytInitialData')) throw 0;
+          if (!done) { done = true; res(t); }
         })
-        .catch(() => {
-          pending--;
-          if (pending === 0 && !done) resolve(null);
-        });
+        .catch(() => { if (--pending === 0 && !done) res(null); });
     });
   });
 }
 
-// Navigate ytInitialData structure to extract videos
-function parseYtInitialData(data) {
-  try {
-    // Try to find the Videos tab content
-    const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs ?? [];
-    let videoItems = null;
-
-    for (const tab of tabs) {
-      const tr = tab.tabRenderer;
-      if (!tr) continue;
-      // Look for the Videos tab
-      const content = tr.content;
-      if (!content) continue;
-
-      // richGridRenderer (newer layout)
-      const grid = content.richGridRenderer?.contents
-        ?? content.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents?.[0]?.gridRenderer?.items;
-
-      if (grid) { videoItems = grid; break; }
-
-      // sectionList fallback
-      const sections = content.sectionListRenderer?.contents;
-      if (sections) {
-        for (const sec of sections) {
-          const items = sec.itemSectionRenderer?.contents?.[0]?.gridRenderer?.items
-            ?? sec.itemSectionRenderer?.contents;
-          if (items && items.length) { videoItems = items; break; }
-        }
-        if (videoItems) break;
-      }
-    }
-
-    if (!videoItems) {
-      // Broader search: walk the entire object looking for videoRenderer
-      videoItems = findVideoRenderers(data);
-    }
-
-    if (!videoItems || !videoItems.length) throw new Error('No video items found');
-
-    const now = new Date();
-    const videos = [];
-
-    for (const item of videoItems) {
-      const vr = item.richItemRenderer?.content?.videoRenderer
-        ?? item.gridVideoRenderer
-        ?? item.videoRenderer;
-      if (!vr) continue;
-
-      const videoId = vr.videoId;
-      if (!videoId) continue;
-
-      const title = vr.title?.runs?.[0]?.text
-        ?? vr.title?.simpleText
-        ?? '(제목 없음)';
-
-      // Parse published time text → approximate date
-      const timeText = vr.publishedTimeText?.simpleText ?? '';
-      const publishedAt = parseRelativeTime(timeText, now);
-
-      // View count
-      const viewText = vr.viewCountText?.simpleText
-        ?? vr.viewCountText?.runs?.map(r=>r.text).join('')
-        ?? '';
-      const views = parseViews(viewText);
-
-      // Duration
-      const dur = vr.lengthText?.simpleText ?? null;
-
-      // Thumbnail: pick highest quality from YouTube CDN
-      const thumb = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
-
-      videos.push({
-        id: videoId,
-        title,
-        thumb,
-        publishedAt,
-        timeText,
-        views,
-        dur,
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-      });
-    }
-
-    return videos.length ? videos : null;
-  } catch(e) {
-    console.warn('parseYtInitialData error:', e.message);
-    return null;
+function parseYtData(data) {
+  const tabs = data?.contents?.twoColumnBrowseResultsRenderer?.tabs ?? [];
+  let items = null;
+  for (const tab of tabs) {
+    const c = tab.tabRenderer?.content;
+    if (!c) continue;
+    const g = c.richGridRenderer?.contents
+      ?? c.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents?.[0]?.gridRenderer?.items;
+    if (g?.length) { items = g; break; }
   }
+  if (!items) return null;
+  const now = new Date();
+  return items.map(item => {
+    const vr = item.richItemRenderer?.content?.videoRenderer ?? item.gridVideoRenderer ?? item.videoRenderer;
+    if (!vr?.videoId) return null;
+    const id = vr.videoId;
+    const tt = vr.publishedTimeText?.simpleText ?? '';
+    return {
+      id, type: 'video',
+      channelLabel: 'RouteAI',
+      title: vr.title?.runs?.[0]?.text ?? vr.title?.simpleText ?? '',
+      thumb: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+      publishedAt: parseRel(tt, now), timeText: tt,
+      views: parseViews(vr.viewCountText?.simpleText ?? ''),
+      url: `https://www.youtube.com/watch?v=${id}`,
+    };
+  }).filter(Boolean);
 }
 
-// Deep-search for videoRenderer objects
-function findVideoRenderers(obj, found = []) {
-  if (!obj || typeof obj !== 'object') return found;
-  if (obj.videoRenderer || obj.gridVideoRenderer) {
-    found.push(obj.videoRenderer ? { videoRenderer: obj.videoRenderer } : { gridVideoRenderer: obj.gridVideoRenderer });
-    return found;
-  }
-  if (found.length >= 50) return found; // cap
-  for (const k of Object.keys(obj)) {
-    findVideoRenderers(obj[k], found);
-    if (found.length >= 50) break;
-  }
-  return found;
-}
-
-// Parse "3 days ago", "2 weeks ago", "1 month ago", "스트리밍 시작 1일 전" etc.
-function parseRelativeTime(text, now) {
-  if (!text) return new Date(now - 30 * 86400_000); // default 30 days
-
-  const t = text.toLowerCase();
-  const num = parseInt(t.match(/\d+/)?.[0] || '1');
-
-  if (/second|초/.test(t))  return new Date(now - num * 1000);
-  if (/minute|분/.test(t))  return new Date(now - num * 60_000);
-  if (/hour|시간/.test(t))  return new Date(now - num * 3600_000);
-  if (/day|일/.test(t))     return new Date(now - num * 86400_000);
-  if (/week|주/.test(t))    return new Date(now - num * 7 * 86400_000);
-  if (/month|개월/.test(t)) return new Date(now - num * 30 * 86400_000);
-  if (/year|년/.test(t))    return new Date(now - num * 365 * 86400_000);
-
-  return new Date(now - 30 * 86400_000);
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Method 2: YouTube Data API v3
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function fetchYouTubeAPI(key) {
-  try {
-    // Search for channel
-    const sr = await jf(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=%40routeai&type=channel&maxResults=5&key=${key}`);
-    if (!sr?.items?.length) return null;
-    const channelId = sr.items[0].snippet.channelId;
-
-    // Get uploads playlist
-    const cd = await jf(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${key}`);
-    const uploadsId = cd.items[0].contentDetails.relatedPlaylists.uploads;
-
-    // Get playlist items
-    const pl = await jf(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${uploadsId}&maxResults=50&key=${key}`);
-    if (!pl?.items?.length) return null;
-
-    // Video details
-    const ids = pl.items.map(i => i.contentDetails.videoId).join(',');
-    const vd = await jf(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${ids}&key=${key}`);
-    const dm = {};
-    vd.items.forEach(v => dm[v.id] = v);
-
-    return pl.items.map(item => {
-      const vid = item.contentDetails.videoId;
-      const d = dm[vid] || {};
-      return {
-        id: vid,
-        title: item.snippet.title,
-        thumb: `https://i.ytimg.com/vi/${vid}/mqdefault.jpg`,
-        publishedAt: new Date(item.snippet.publishedAt),
-        timeText: '',
-        views: d.statistics?.viewCount ? +d.statistics.viewCount : null,
-        dur: d.contentDetails?.duration ? parseDur(d.contentDetails.duration) : null,
-        url: `https://www.youtube.com/watch?v=${vid}`,
-      };
-    });
-  } catch(e) {
-    console.warn('YT API error:', e.message);
-    return null;
-  }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Method 3: Invidious (fallback)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function fetchInvidious() {
-  const instances = [
-    'https://invidious.io.lol',
-    'https://invidious.privacydev.net',
-    'https://iv.datura.network',
-    'https://invidious.lunar.icu',
-    'https://inv.clip.cafe',
-    'https://invidious.fdn.fr',
-  ];
-  for (const base of instances) {
-    for (const h of ['@routeai', 'routeai']) {
-      try {
-        const res = await fetch(`${base}/api/v1/channels/${encodeURIComponent(h)}/videos`, {
-          signal: AbortSignal.timeout(6000),
-        });
-        if (!res.ok) continue;
-        const data = await res.json();
-        const vids = Array.isArray(data) ? data : data.videos;
-        if (!vids?.length) continue;
-        return vids.map(v => ({
-          id: v.videoId,
-          title: v.title,
-          thumb: `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`,
-          publishedAt: new Date(v.published * 1000),
-          timeText: '',
-          views: v.viewCount ?? null,
-          dur: v.lengthSeconds ? fmtSecs(v.lengthSeconds) : null,
-          url: `https://www.youtube.com/watch?v=${v.videoId}`,
-        }));
-      } catch(e) { /* try next */ }
-    }
-  }
-  return null;
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Render
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── Render ────────────────────────────────────────────────
 function render(videos) {
-  const now  = new Date();
-  const d7   = new Date(now - 7  * 86400_000);
-  const d14  = new Date(now - 14 * 86400_000);
+  // Hero 영상 선택
+  window._heroVideo = pickHeroVideo(videos);
+  initHero(window._heroVideo);
 
-  const w1 = [], w2 = [], old = [];
+  const buckets = CATS.map(() => ({ lives: [], videos: [], shorts: [] }));
   videos.forEach(v => {
-    if      (v.publishedAt >= d7)  w1.push(v);
-    else if (v.publishedAt >= d14) w2.push(v);
-    else                           old.push(v);
+    const b = getBucket(v.publishedAt instanceof Date ? v.publishedAt : new Date(v.publishedAt));
+    const type = v.type || 'video';
+    // LIVE takes priority over short/video
+    if (isLiveVideo(v))           buckets[b].lives.push(v);
+    else if (type === 'short')    buckets[b].shorts.push(v);
+    else                          buckets[b].videos.push(v);
   });
 
-  setTxt('cnt-all', videos.length);
-  setTxt('cnt-w1',  w1.length);
-  setTxt('cnt-w2',  w2.length);
-  setTxt('cnt-old', old.length);
-  setTxt('sc-w1',  `${w1.length}개`);
-  setTxt('sc-w2',  `${w2.length}개`);
-  setTxt('sc-old', `${old.length}개`);
+  const totals = buckets.map(b => b.lives.length + b.videos.length + b.shorts.length);
+  setTxt('cnt-all',   videos.length);
+  setTxt('cnt-live',  buckets.reduce((s, b) => s + b.lives.length,  0));
+  setTxt('cnt-video', buckets.reduce((s, b) => s + b.videos.length, 0));
+  setTxt('cnt-short', buckets.reduce((s, b) => s + b.shorts.length, 0));
 
-  fillGrid('grid-w1',  w1,  'w1',  now);
-  fillGrid('grid-w2',  w2,  'w2',  now);
-  fillGrid('grid-old', old, 'old', now);
+  // Init lazy store
+  lazyStore.live   = buckets[LAZY_CAT].lives;
+  lazyStore.video  = buckets[LAZY_CAT].videos;
+  lazyStore.short  = buckets[LAZY_CAT].shorts;
+  lazyOffset.live  = 0;
+  lazyOffset.video = 0;
+  lazyOffset.short = 0;
+
+  const main = document.getElementById('main-content');
+  main.innerHTML = '';
+
+  CATS.forEach((cat, i) => {
+    const { lives, videos: vids, shorts } = buckets[i];
+    if (!lives.length && !vids.length && !shorts.length) return;
+
+    const sec = document.createElement('div');
+    sec.className = `t-section ${cat.cls}`;
+    sec.id = `sec-${i}`;
+
+    // Section header
+    const head = document.createElement('div');
+    head.className = 't-head';
+    head.innerHTML = `
+      <div class="t-head-left">
+        <span class="t-name">${cat.label}</span>
+        <span class="t-badge">${cat.badge}</span>
+      </div>
+      <span class="t-cnt">${totals[i]}개</span>`;
+    sec.appendChild(head);
+
+    if (i === LAZY_CAT) {
+      // Lazy: show first LAZY_INIT — order: 라이브 → Shorts → 동영상
+      if (lazyStore.live.length)
+        sec.appendChild(buildRail(lazyStore.live.slice(0, LAZY_INIT),  'live',  i, true));
+      if (lazyStore.short.length)
+        sec.appendChild(buildRail(lazyStore.short.slice(0, LAZY_INIT), 'short', i, true));
+      if (lazyStore.video.length)
+        sec.appendChild(buildRail(lazyStore.video.slice(0, LAZY_INIT), 'video', i, true));
+      lazyOffset.live  = Math.min(LAZY_INIT, lazyStore.live.length);
+      lazyOffset.short = Math.min(LAZY_INIT, lazyStore.short.length);
+      lazyOffset.video = Math.min(LAZY_INIT, lazyStore.video.length);
+    } else {
+      // Order: 라이브 → Shorts → 동영상
+      if (lives.length)  sec.appendChild(buildRail(lives,  'live',  i, false));
+      if (shorts.length) sec.appendChild(buildRail(shorts, 'short', i, false));
+      if (vids.length)   sec.appendChild(buildRail(vids,   'video', i, false));
+    }
+
+    const div = document.createElement('div');
+    div.className = 't-divider';
+    sec.appendChild(div);
+    main.appendChild(sec);
+  });
 
   show('content', true);
 }
 
-function fillGrid(id, videos, cat, now) {
-  const el = document.getElementById(id);
-  if (!videos.length) {
-    el.innerHTML = '<div class="empty">이 기간에 업로드된 동영상이 없습니다</div>';
-    return;
-  }
-  el.innerHTML = videos.map(v => cardHTML(v, cat, now)).join('');
+// ── Build Rail ────────────────────────────────────────────
+function buildRail(items, type, catIdx, isLazy) {
+  const wrap = document.createElement('div');
+  wrap.className = 'rail-wrap';
+  wrap.dataset.type = type;
+
+  const isShort = type === 'short';
+  const isLive  = type === 'live';
+  const lbl     = isShort ? 'Shorts' : isLive ? '🔴 라이브' : '동영상';
+  const badge   = isShort ? 'rl-short' : isLive ? 'rl-live' : 'rl-video';
+  const railId  = `rail-${type}-${catIdx}`;
+
+  // Label row
+  const labelDiv = document.createElement('div');
+  labelDiv.className = 'rail-label';
+  labelDiv.innerHTML = `<span class="rl-badge ${badge}">${lbl}</span>`;
+  wrap.appendChild(labelDiv);
+
+  // Arrow Left
+  const arrL = document.createElement('button');
+  arrL.className = 'arr arr-l hidden';
+  arrL.setAttribute('aria-label', '이전');
+  arrL.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>`;
+  wrap.appendChild(arrL);
+
+  // Rail
+  const rail = document.createElement('div');
+  rail.className = 'rail';
+  rail.id = railId;
+  items.forEach(v => rail.insertAdjacentHTML('beforeend', cardHTML(v)));
+  wrap.appendChild(rail);
+
+  // Arrow Right
+  const arrR = document.createElement('button');
+  arrR.className = 'arr arr-r';
+  arrR.setAttribute('aria-label', '다음');
+  arrR.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>`;
+  wrap.appendChild(arrR);
+
+  // Arrow click handlers
+  const cardW = isShort ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--s-w')) || 145
+                        : parseInt(getComputedStyle(document.documentElement).getPropertyValue('--v-w')) || 258;
+
+  arrL.onclick = () => rail.scrollTo({ left: Math.max(0, rail.scrollLeft - (cardW + 12) * 3), behavior: 'smooth' });
+  arrR.onclick = () => rail.scrollTo({ left: Math.min(rail.scrollWidth - rail.clientWidth, rail.scrollLeft + (cardW + 12) * 3), behavior: 'smooth' });
+
+  // Update arrow visibility on scroll
+  const updateArrows = () => {
+    const atStart = rail.scrollLeft <= 2;
+    const atEnd   = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4;
+    arrL.classList.toggle('hidden', atStart);
+    arrR.classList.toggle('hidden', atEnd);
+
+    // Lazy load: fetch more when near the end
+    if (isLazy && atEnd) loadMoreLazy(type, rail, arrR, isShort);
+  };
+
+  rail.addEventListener('scroll', updateArrows, { passive: true });
+
+  // Initial arrow state (after layout)
+  requestAnimationFrame(() => updateArrows());
+
+  return wrap;
 }
 
-function cardHTML(v, cat, now) {
-  const isNew = (now - v.publishedAt) < 3 * 86400_000;
-  const when  = v.timeText || relDate(v.publishedAt, now);
-  const viewsTxt = v.views != null ? `👁 ${fmtN(v.views)}` : '';
+// ── Lazy Load ────────────────────────────────────────────
+function loadMoreLazy(type, rail, arrR, isShort) {
+  const store  = lazyStore[type];
+  const offset = lazyOffset[type];
+
+  // All local items loaded — show YouTube fetch button
+  if (offset >= store.length) {
+    if (!rail.querySelector('.fetch-more-card'))
+      addFetchMoreCard(rail, type, isShort);
+    return;
+  }
+
+  const batch = store.slice(offset, offset + LAZY_BATCH);
+  if (!batch.length) return;
+
+  // Remove existing placeholders
+  rail.querySelectorAll('.load-more-card, .fetch-more-card').forEach(el => el.remove());
+
+  batch.forEach(v => rail.insertAdjacentHTML('beforeend', cardHTML(v)));
+  lazyOffset[type] += batch.length;
+
+  if (lazyOffset[type] < store.length) {
+    addLoadMoreCard(rail, type, arrR, isShort);
+  } else {
+    addFetchMoreCard(rail, type, isShort);
+  }
+
+  requestAnimationFrame(() => {
+    const atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4;
+    arrR.classList.toggle('hidden', atEnd);
+  });
+}
+
+function addLoadMoreCard(rail, type, arrR, isShort) {
+  const remaining = lazyStore[type].length - lazyOffset[type];
+  const card = document.createElement('div');
+  card.className = `load-more-card${isShort ? ' short-size' : ''}`;
+  card.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="8 12 12 16 16 12"/>
+      <line x1="12" y1="8" x2="12" y2="16"/>
+    </svg>
+    <span>+${remaining}개 더 보기</span>`;
+  card.onclick = () => { card.remove(); loadMoreLazy(type, rail, arrR, isShort); };
+  rail.appendChild(card);
+}
+
+function addFetchMoreCard(rail, type, isShort) {
+  if (rail.querySelector('.fetch-more-card')) return;
+  const card = document.createElement('div');
+  card.className = `load-more-card fetch-more-card${isShort ? ' short-size' : ''}`;
+  card.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    <span>더 많은 영상 보러가기</span>`;
+  card.onclick = () => showYtPopup();
+  rail.appendChild(card);
+}
+
+// ── Card HTML ────────────────────────────────────────────
+function cardHTML(v) {
+  const isLive  = isLiveVideo(v);
+  const type    = v.type || 'video';
+  const isShort = !isLive && type === 'short';   // LIVE overrides short
+  const isNew   = !isLive && (Date.now() - new Date(v.publishedAt)) < 6 * 3600_000;
+  const when    = v.timeText || relDate(new Date(v.publishedAt));
+  const views   = v.views != null ? `👁 ${fmtN(v.views)}` : '';
 
   return `
-<a class="card" href="${esc(v.url)}" target="_blank" rel="noopener">
+<a class="card card-${isShort ? 's' : 'v'}" href="${esc(v.url)}" target="_blank" rel="noopener">
   <div class="thumb">
-    <img
-      src="${esc(v.thumb)}"
-      alt="${esc(v.title)}"
-      loading="lazy"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-    />
+    <img src="${esc(v.thumb)}" alt="${esc(v.title)}" loading="lazy"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
     <div class="thumb-err">▶</div>
-    ${isNew ? '<span class="badge-new">NEW</span>' : ''}
-    ${v.dur ? `<span class="badge-dur">${esc(v.dur)}</span>` : ''}
+    ${isLive ? '<span class="badge badge-live">🔴 LIVE</span>' : ''}
+    ${isNew  ? '<span class="badge badge-new">NEW</span>' : ''}
+    <span class="badge badge-when">${when}</span>
     <div class="play-wrap">
-      <div class="play-btn">
-        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
-      </div>
+      <div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
     </div>
   </div>
   <div class="card-body">
     <div class="card-title">${esc(v.title)}</div>
-    <div class="card-meta">
-      <span class="card-views">${viewsTxt}</span>
-      <span class="card-when w-${cat}">${when}</span>
-    </div>
+    <div class="card-views">${views}</div>
   </div>
 </a>`;
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Filter
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── Filter ───────────────────────────────────────────────
 function setFilter(el, f) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  if (f === 'all') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-  document.getElementById(`sec-${f}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Show/hide rail-wraps by type
+  document.querySelectorAll('.rail-wrap').forEach(w => {
+    w.style.display = (f === 'all' || w.dataset.type === f) ? '' : 'none';
+  });
+
+  // Hide date sections that have no visible rails
+  document.querySelectorAll('.t-section').forEach(sec => {
+    const hasVisible = [...sec.querySelectorAll('.rail-wrap')]
+      .some(w => w.style.display !== 'none');
+    sec.style.display = hasVisible ? '' : 'none';
+  });
+
+  // 스크롤 위치 유지 (필터 클릭 시 현재 위치에서 필터링)
 }
 
-function tryWithKey() {
-  const k = document.getElementById('key-input').value.trim();
-  if (!k) return;
-  savedKey = k;
-  localStorage.setItem('yt_api_key', k);
-  loadVideos();
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Helpers
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── Helpers ──────────────────────────────────────────────
 function show(id, on) {
   const el = document.getElementById(id);
   if (el) el.style.display = on ? (id === 'loading' ? 'flex' : 'block') : 'none';
 }
 function setTxt(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
-function showErr(msg) {
-  show('err-box', true);
-  setTxt('err-detail', msg);
-  if (savedKey) document.getElementById('key-input').value = savedKey;
+function fmtTime(d) {
+  return `업데이트: ${d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
 }
-async function jf(url) {
-  const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
+let modalMuted = true;  // 모달 독립 음소거 상태
+let modalTimer = null;  // 모달 1분 프리뷰 타이머
+
+function showVideoModal(v) {
+  if (!v || document.getElementById('vd-overlay')) return;
+  const elapsed = heroStartedAt ? Math.floor((Date.now() - heroStartedAt) / 1000) : 0;
+  const start   = Math.max(0, elapsed);
+
+  // 히어로 음소거 → 모달이 소리를 담당
+  const heroWasUnmuted = !heroMuted;
+  setHeroMuted(true);
+  modalMuted = !heroWasUnmuted;  // 히어로가 켜져 있었으면 모달도 켜짐
+
+  const overlay = document.createElement('div');
+  overlay.id = 'vd-overlay';
+  overlay.innerHTML = `
+    <div id="vd-modal">
+      <button id="vd-close" onclick="closeVideoModal()" aria-label="닫기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div id="vd-video-wrap">
+        <iframe id="vd-iframe"
+          src="https://www.youtube.com/embed/${esc(v.id)}?autoplay=1&mute=1&start=${start}&controls=0&disablekb=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1"
+          style="pointer-events:none"
+          allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <div id="vd-video-grad"></div>
+      </div>
+      <div id="vd-body">
+        <div id="vd-meta"><span id="vd-ch">${esc(v.channelLabel || 'RouteAI')}</span></div>
+        <div id="vd-title">${esc(v.title || '')}</div>
+        <div id="vd-actions">
+          <button id="vd-unmute" onclick="vdToggleMute()">
+            <svg class="ico-mute" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16.5 12A4.5 4.5 0 0 0 14 8v2.18l2.45 2.45c.05-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0 0 17.73 19l1.98 2L21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+            </svg>
+            <svg class="ico-sound" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.23v2.06A6.5 6.5 0 0 1 14 20.71v2.06c3.88-.99 6.71-4.53 6.71-8.77S17.88 4.22 14 3.23z"/>
+            </svg>
+            <span class="vd-btn-text">소리 켜기</span>
+          </button>
+          <a id="vd-yt-btn" href="${esc(v.url || '#')}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            <span class="vd-btn-text">YouTube에서 보기</span>
+          </a>
+        </div>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeVideoModal(); });
+  document.body.appendChild(overlay);
+  // iframe 로드 후 모달 소리 상태 적용
+  setTimeout(() => applyModalMute(modalMuted), 800);
+
+  // 1분 프리뷰 타이머 (히어로에서 이어받은 잔여 시간)
+  clearTimeout(modalTimer);
+  const remaining = Math.max(0, 60 - start);
+  if (remaining <= 0) {
+    stopModalVideo();
+  } else {
+    modalTimer = setTimeout(stopModalVideo, remaining * 1000);
+  }
 }
-function relDate(d, now) {
-  const mins  = Math.floor((now - d) / 60000);
-  const hours = Math.floor(mins / 60);
-  const days  = Math.floor(hours / 24);
-  if (mins < 60)  return `${mins}분 전`;
-  if (hours < 24) return `${hours}시간 전`;
-  if (days === 1) return '어제';
-  if (days < 7)   return `${days}일 전`;
-  if (days < 30)  return `${Math.floor(days/7)}주 전`;
-  return `${Math.floor(days/30)}개월 전`;
+
+function stopModalVideo() {
+  clearTimeout(modalTimer);
+  const wrap = document.getElementById('vd-video-wrap');
+  if (!wrap) return;
+  document.getElementById('vd-iframe')?.remove();
+  // 썸네일로 대체
+  const v = window._heroVideo;
+  if (v) {
+    wrap.style.backgroundImage    = `url('${v.thumb}')`;
+    wrap.style.backgroundSize     = 'cover';
+    wrap.style.backgroundPosition = 'center';
+  }
+  // 소리 버튼 숨김
+  const unmuteBtn = document.getElementById('vd-unmute');
+  if (unmuteBtn) unmuteBtn.style.display = 'none';
+  // 다시보기 버튼 표시
+  if (!document.getElementById('vd-replay')) {
+    const btn = document.createElement('button');
+    btn.id = 'vd-replay';
+    btn.textContent = '↺ 다시 보기';
+    btn.onclick = modalReplay;
+    wrap.appendChild(btn);
+  }
 }
+
+function modalReplay() {
+  const v = window._heroVideo;
+  if (!v) return;
+  const wrap = document.getElementById('vd-video-wrap');
+  if (!wrap) return;
+  document.getElementById('vd-replay')?.remove();
+  wrap.style.backgroundImage = '';
+  // iframe 재생성 (처음부터)
+  const iframe = document.createElement('iframe');
+  iframe.id = 'vd-iframe';
+  iframe.src = `https://www.youtube.com/embed/${esc(v.id)}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1`;
+  iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;pointer-events:none;';
+  iframe.allow = 'autoplay; encrypted-media';
+  iframe.allowFullscreen = true;
+  wrap.insertBefore(iframe, wrap.firstChild);
+  // 소리 버튼 복원
+  const unmuteBtn = document.getElementById('vd-unmute');
+  if (unmuteBtn) unmuteBtn.style.display = '';
+  modalMuted = true;
+  applyModalMute(true);
+  clearTimeout(modalTimer);
+  modalTimer = setTimeout(stopModalVideo, 60000);
+}
+
+function applyModalMute(muted) {
+  const cmd = muted ? 'mute' : 'unMute';
+  document.getElementById('vd-iframe')
+    ?.contentWindow?.postMessage(JSON.stringify({ event:'command', func:cmd, args:[] }), '*');
+  const btn = document.getElementById('vd-unmute');
+  if (btn) {
+    btn.classList.toggle('on', !muted);
+    btn.querySelector('.vd-btn-text').textContent = muted ? '소리 켜기' : '소리 끄기';
+  }
+}
+
+function vdToggleMute() {
+  modalMuted = !modalMuted;
+  applyModalMute(modalMuted);
+}
+
+function closeVideoModal() {
+  clearTimeout(modalTimer);
+  const targetMuted = modalMuted;  // 모달 닫힐 때 소리 상태 저장
+  document.getElementById('vd-overlay')?.remove();
+
+  if (!document.getElementById('hero-iframe') && window._heroVideo) {
+    // 히어로가 정지된 상태 → 재시작 후 소리 상태 적용
+    initHero(window._heroVideo);
+    // initHero가 muted=true로 초기화하므로, 원하는 상태로 덮어씀
+    setTimeout(() => setHeroMuted(targetMuted), 800);
+  } else {
+    // 히어로가 재생 중이었으면 소리 상태만 인수
+    setHeroMuted(targetMuted);
+  }
+}
+
+function showYtPopup() {
+  if (document.getElementById('yt-popup-overlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'yt-popup-overlay';
+  overlay.innerHTML = `
+    <div id="yt-popup">
+      <div class="yt-popup-icon">📺</div>
+      <p>더 많은 영상을 보려면 유튜브 채널에서 확인해 주세요.</p>
+      <div class="yt-popup-btns">
+        <a class="btn-ch1" href="https://www.youtube.com/@routeai" target="_blank" rel="noopener"
+           onclick="closeYtPopup()">RouteAI 유튜브 채널 바로가기</a>
+        <button onclick="closeYtPopup()">닫기</button>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeYtPopup(); });
+  document.body.appendChild(overlay);
+}
+function closeYtPopup() {
+  document.getElementById('yt-popup-overlay')?.remove();
+}
+
+function parseRel(t, now) {
+  if (!t) return new Date(now - 30 * 86400_000);
+  if (/^오늘|^today/i.test(t.trim()))     return new Date(now - 1 * 864e5);
+  if (/^어제|^yesterday/i.test(t.trim())) return new Date(now - 1 * 864e5);
+  const n = parseInt(t.match(/\d+/)?.[0] || '1');
+  if (/second|초/.test(t))  return new Date(now - n * 1e3);
+  if (/minute|분/.test(t))  return new Date(now - n * 6e4);
+  if (/hour|시간/.test(t))  return new Date(now - n * 36e5);
+  if (/day|일/.test(t))     return new Date(now - n * 864e5);
+  if (/week|주/.test(t))    return new Date(now - n * 7 * 864e5);
+  if (/month|개월/.test(t)) return new Date(now - n * 30 * 864e5);
+  if (/year|년/.test(t))    return new Date(now - n * 365 * 864e5);
+  return new Date(now - 30 * 864e5);
+}
+function relDate(d) {
+  const s = (Date.now() - d) / 1000;
+  if (s < 3600)   return `${Math.floor(s/60)}분 전`;
+  if (s < 86400)  return `${Math.floor(s/3600)}시간 전`;
+  if (s < 172800) return '어제';
+  return `${Math.floor(s/86400)}일 전`;
+}
+function parseViews(t) { const m = t.replace(/,/g,'').match(/\d+/); return m ? +m[0] : null; }
 function fmtN(n) {
   if (n >= 10000) return `${Math.floor(n/10000)}만`;
   if (n >= 1000)  return `${(n/1000).toFixed(1)}천`;
   return String(n);
 }
-function parseViews(t) {
-  if (!t) return null;
-  const m = t.replace(/,/g,'').match(/(\d+)/);
-  return m ? +m[1] : null;
-}
-function fmtSecs(s) {
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
-  if (h) return `${h}:${pad(m)}:${pad(sec)}`;
-  return `${m}:${pad(sec)}`;
-}
-function parseDur(iso) {
-  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if (!m) return null;
-  return fmtSecs((+m[1]||0)*3600 + (+m[2]||0)*60 + (+m[3]||0));
-}
-function pad(n) { return String(n).padStart(2,'0'); }
 function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Init
+// ── Intro ────────────────────────────────────────────────
+let introMuted = true;
+function introToggleMute() {
+  const iframe = document.getElementById('intro-iframe');
+  if (!iframe) return;
+  introMuted = !introMuted;
+  iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func: introMuted ? 'mute' : 'unMute', args:[] }), '*');
+  document.getElementById('ico-mute').style.display  = introMuted ? '' : 'none';
+  document.getElementById('ico-sound').style.display = introMuted ? 'none' : '';
+}
+function dismissIntro() {
+  const overlay = document.getElementById('intro-overlay');
+  if (!overlay) return;
+  overlay.style.opacity = '0';
+  setTimeout(() => overlay.remove(), 650);
+}
+setTimeout(dismissIntro, 3000);
+
+// ── Hero ─────────────────────────────────────────────────
+let heroMuted = true;
+let heroTimer = null;
+let heroStartedAt = 0;   // 히어로 재생 시작 시각 (elapsed 계산용)
+let heroPausedAt  = null; // 스크롤 아웃으로 일시정지된 경과 시간(초), null=정지 아님
+const HERO_IFRAME_STYLE = 'position:absolute;top:-60px;left:-10%;width:120%;height:calc(100% + 120px);border:none;pointer-events:none;transition:opacity 1s ease;';
+
+function createHeroIframe(videoId, startSec = 0) {
+  document.getElementById('hero-iframe')?.remove();
+  const iframe = document.createElement('iframe');
+  iframe.id    = 'hero-iframe';
+  iframe.style.cssText = HERO_IFRAME_STYLE;
+  iframe.allow = 'autoplay; encrypted-media';
+  iframe.allowFullscreen = true;
+  const start  = startSec > 0 ? `&start=${Math.floor(startSec)}` : '';
+  iframe.src   = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1${start}`;
+  document.getElementById('hero').insertBefore(iframe, document.getElementById('hero-gradient'));
+  return iframe;
+}
+
+function stopHeroVideo() {
+  heroPausedAt = null;  // 명시적 정지 — 스크롤 복귀 시 재개 안 함
+  clearTimeout(heroTimer);
+  document.getElementById('hero-iframe')?.remove();   // DOM 제거 → 즉시 재생 중단, 히스토리 무영향
+  document.getElementById('hero-thumb').style.opacity  = '1';
+  document.getElementById('hero-mute').style.display   = 'none';
+  document.getElementById('hero-replay').style.display = 'flex';
+}
+
+function initHero(v) {
+  if (!v) return;
+  const thumb = document.getElementById('hero-thumb');
+  document.getElementById('hero-ch-label').textContent = v.channelLabel || '';
+  document.getElementById('hero-title').textContent    = v.title || '';
+  document.getElementById('hero-play-btn').href        = v.url || '#';
+  thumb.style.backgroundImage = `url('${v.thumb}')`;
+
+  // 버튼 상태 항상 초기화
+  heroMuted = true;
+  document.getElementById('hero-mute').style.display    = 'flex';
+  document.getElementById('hero-replay').style.display  = 'none';
+  document.getElementById('hero-ico-mute').style.display  = '';
+  document.getElementById('hero-ico-sound').style.display = 'none';
+
+  heroPausedAt  = null;
+  heroStartedAt = Date.now();
+  const iframe = createHeroIframe(v.id);
+  iframe.style.opacity = '1';
+  thumb.style.opacity  = '0.3';
+
+  clearTimeout(heroTimer);
+  heroTimer = setTimeout(stopHeroVideo, 60000);  // 1분 후 정지
+}
+
+function heroReplay() {
+  const v = window._heroVideo;
+  if (!v) return;
+  document.getElementById('hero-replay').style.display = 'none';
+  document.getElementById('hero-mute').style.display   = 'flex';
+  heroMuted = true;
+  document.getElementById('hero-ico-mute').style.display  = '';
+  document.getElementById('hero-ico-sound').style.display = 'none';
+  initHero(v);
+}
+
+function heroToggleMute() { setHeroMuted(!heroMuted); }
+
+function setHeroMuted(muted) {
+  heroMuted = muted;
+  document.getElementById('hero-iframe')
+    ?.contentWindow?.postMessage(JSON.stringify({ event:'command', func: muted ? 'mute' : 'unMute', args:[] }), '*');
+  document.getElementById('hero-ico-mute').style.display  = muted ? '' : 'none';
+  document.getElementById('hero-ico-sound').style.display = muted ? 'none' : '';
+}
+
+// Nav 스크롤 시 배경 solid
+window.addEventListener('scroll', () => {
+  document.getElementById('nf-nav').classList.toggle('solid', window.scrollY > 20);
+}, { passive: true });
+
+// ── 히어로 스크롤 일시정지 / 재개 ──────────────────────────────────────────
+// iOS Safari는 scroll/setTimeout 콜백에서 새로 생성한 iframe의 autoplay를 차단.
+// 따라서 scroll-out 시 iframe을 제거하지 않고 pauseVideo + 숨김,
+// scroll-in 시 playVideo + 표시하여 재개함 (iframe 재생성 없음).
+
+function pauseHeroForScroll() {
+  const iframe = document.getElementById('hero-iframe');
+  if (!iframe) return;
+  heroPausedAt = heroStartedAt ? Math.floor((Date.now() - heroStartedAt) / 1000) : 0;
+  clearTimeout(heroTimer);
+  iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'pauseVideo', args:[]}), '*');
+  iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'mute',        args:[]}), '*');
+  iframe.style.opacity = '0';
+  document.getElementById('hero-thumb').style.opacity = '1';
+}
+
+let _heroResumeTimer = null;
+function scheduleHeroResume() {
+  clearTimeout(_heroResumeTimer);
+  _heroResumeTimer = setTimeout(() => {
+    if (heroPausedAt === null || !window._heroVideo) return;
+    const iframe = document.getElementById('hero-iframe');
+    if (!iframe) return; // stopHeroVideo()가 이미 호출된 상태
+    const elapsed   = heroPausedAt;
+    heroPausedAt    = null;
+    const remaining = 60 - elapsed;
+    if (remaining <= 0) { stopHeroVideo(); return; }
+    heroStartedAt = Date.now() - elapsed * 1000;
+    iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'playVideo', args:[]}), '*');
+    iframe.style.opacity = '1';
+    document.getElementById('hero-thumb').style.opacity = '0.3';
+    clearTimeout(heroTimer);
+    heroTimer = setTimeout(stopHeroVideo, remaining * 1000);
+    if (!heroMuted) setTimeout(() => setHeroMuted(false), 300);
+  }, 300);
+}
+
+// IntersectionObserver: 스크롤 아웃 감지 (Android / 데스크탑)
+new IntersectionObserver(entries => {
+  const isVisible = entries[0].isIntersecting;
+  if (!isVisible) {
+    clearTimeout(_heroResumeTimer);
+    pauseHeroForScroll();
+  } else {
+    scheduleHeroResume();
+  }
+}, { threshold: 0.1 }).observe(document.getElementById('hero'));
+
+// scroll 이벤트 fallback: iOS Safari는 최상단 복귀 시 IO가 발화하지 않는 버그 존재
+window.addEventListener('scroll', () => {
+  if (heroPausedAt === null) return;
+  const rect = document.getElementById('hero').getBoundingClientRect();
+  if (rect.bottom > window.innerHeight * 0.2) scheduleHeroResume();
+  else { clearTimeout(_heroResumeTimer); }
+}, { passive: true });
+
 loadVideos();
+
+// 백그라운드 복귀 시 데이터 갱신 (5분 이상 백그라운드였을 경우)
+// visibilitychange: Android / 데스크탑
+// pagehide / pageshow: iOS Safari / iPadOS PWA (WKWebView) 에서 더 신뢰성 있음
+let _hiddenAt = 0;
+function _onAppHidden()  { _hiddenAt = Date.now(); }
+function _onAppVisible() {
+  if (_hiddenAt > 0 && Date.now() - _hiddenAt > 5 * 60 * 1000) loadVideos();
+  _hiddenAt = 0;
+}
+document.addEventListener('visibilitychange', () => {
+  document.visibilityState === 'hidden' ? _onAppHidden() : _onAppVisible();
+});
+window.addEventListener('pagehide', _onAppHidden);
+window.addEventListener('pageshow', e => { if (e.persisted) _onAppVisible(); });
 </script>
 </body>
 </html>
