@@ -228,8 +228,9 @@ def scrape_videos_page(url):
 # ── Shorts 감지 ──────────────────────────────────────────
 def get_short_ids(html):
     """
-    /shorts 페이지의 ytInitialData에서 reelItemRenderer 기반으로 short ID만 추출.
-    broad regex 대신 정확한 렌더러를 사용해 오분류 방지.
+    /shorts 페이지 ytInitialData에서 short ID 추출.
+    - 구 구조: reelItemRenderer
+    - 신 구조: shortsLockupViewModel (2024년 이후 YouTube UI)
     """
     data = extract_yt_initial_data(html)
     if not data:
@@ -245,12 +246,23 @@ def get_short_ids(html):
                        .get('gridRenderer', {}).get('items')
         )
         for item in (grid or []):
-            vr = (
-                item.get('richItemRenderer', {}).get('content', {}).get('reelItemRenderer')
-                or item.get('reelItemRenderer')
-            )
+            rc = item.get('richItemRenderer', {}).get('content', {})
+
+            # 구 구조: reelItemRenderer
+            vr = rc.get('reelItemRenderer') or item.get('reelItemRenderer')
             if vr:
                 vid = vr.get('videoId')
+                if vid:
+                    short_ids.add(vid)
+                    continue
+
+            # 신 구조: shortsLockupViewModel
+            slvm = rc.get('shortsLockupViewModel') or item.get('shortsLockupViewModel')
+            if slvm:
+                vid = (slvm.get('onTap', {})
+                           .get('innertubeCommand', {})
+                           .get('reelWatchEndpoint', {})
+                           .get('videoId'))
                 if vid:
                     short_ids.add(vid)
     return short_ids
