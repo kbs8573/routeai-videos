@@ -33,35 +33,6 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
       overflow-x: hidden; }
 
-    /* ── Intro overlay ── */
-    #intro-overlay {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #000;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity .6s ease;
-    }
-    #intro-overlay iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
-    #intro-tl-cover { position: absolute; top: 0; left: 0; width: 220px; height: 50px; background: #000; z-index: 1; }
-    #intro-progress {
-      position: absolute; bottom: 0; left: 0; height: 3px; background: #e50914;
-      animation: progress-bar 3s linear forwards;
-    }
-    @keyframes progress-bar { from { width: 0 } to { width: 100% } }
-    #intro-unmute {
-      position: absolute; bottom: 20px; left: 20px;
-      color: #fff; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.3);
-      border-radius: 50%; width: 44px; height: 44px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; transition: background .15s;
-    }
-    #intro-unmute:hover { background: rgba(229,9,20,.8); border-color: #e50914; }
-    #intro-skip {
-      position: absolute; bottom: 20px; right: 20px;
-      color: rgba(255,255,255,.65); font-size: 13px; cursor: pointer;
-      background: rgba(0,0,0,.55); padding: 7px 16px; border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.2); transition: color .15s, border-color .15s;
-    }
-    #intro-skip:hover { color: #fff; border-color: rgba(255,255,255,.5); }
-
     /* ── Netflix Nav ── */
     #nf-nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
@@ -487,24 +458,6 @@
   </style>
 </head>
 <body>
-
-<!-- ── Intro Overlay ── -->
-<div id="intro-overlay">
-  <iframe id="intro-iframe"
-    src="https://www.youtube-nocookie.com/embed/0JyWrRmsjss?start=34&autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1"
-    allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  <div id="intro-tl-cover"></div>
-  <div id="intro-progress"></div>
-  <button id="intro-unmute" onclick="introToggleMute()" title="소리 켜기">
-    <svg id="ico-mute" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M16.5 12A4.5 4.5 0 0 0 14 8v2.18l2.45 2.45c.05-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0 0 17.73 19l1.98 2L21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-    </svg>
-    <svg id="ico-sound" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.23v2.06A6.5 6.5 0 0 1 14 20.71v2.06c3.88-.99 6.71-4.53 6.71-8.77S17.88 4.22 14 3.23z"/>
-    </svg>
-  </button>
-  <div id="intro-skip" onclick="dismissIntro()">건너뛰기 ›</div>
-</div>
 
 <!-- ── Netflix Nav ── -->
 <nav id="nf-nav">
@@ -1196,23 +1149,6 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Intro ────────────────────────────────────────────────
-let introMuted = true;
-function introToggleMute() {
-  const iframe = document.getElementById('intro-iframe');
-  if (!iframe) return;
-  introMuted = !introMuted;
-  iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func: introMuted ? 'mute' : 'unMute', args:[] }), '*');
-  document.getElementById('ico-mute').style.display  = introMuted ? '' : 'none';
-  document.getElementById('ico-sound').style.display = introMuted ? 'none' : '';
-}
-function dismissIntro() {
-  const overlay = document.getElementById('intro-overlay');
-  if (!overlay) return;
-  overlay.style.opacity = '0';
-  setTimeout(() => overlay.remove(), 650);
-}
-setTimeout(dismissIntro, 3000);
 
 // ── Hero ─────────────────────────────────────────────────
 let heroMuted = true;
