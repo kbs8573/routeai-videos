@@ -556,25 +556,29 @@ function isLiveVideo(v) {
 }
 
 function pickHeroVideo(videos) {
+  // Shorts는 세로 비율이라 히어로에 부적합 → 제외
+  const candidates = videos.filter(v => (v.type || 'video') !== 'short');
+  const pool_src = candidates.length ? candidates : videos;
+
   const now = Date.now();
   const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
 
   // 1. 현재 라이브 중: type=live + 4시간 이내 업로드
-  const currentLive = videos.find(v =>
+  const currentLive = pool_src.find(v =>
     isLiveVideo(v) && (now - new Date(v.publishedAt).getTime()) < 4 * 3600_000
   );
   if (currentLive) return currentLive;
 
   // 2. 후보 풀 (랜덤)
-  const todayVids = videos.filter(v => new Date(v.publishedAt) >= todayStart);
+  const todayVids = pool_src.filter(v => new Date(v.publishedAt) >= todayStart);
 
-  const todayLive     = todayVids.find(v => isLiveVideo(v));                           // 오늘 라이브
-  const mostViewed    = [...videos].sort((a, b) => (b.views||0) - (a.views||0))[0];   // 누적 최다 조회수
-  const mostRecent    = videos[0];                                                      // 가장 최근 영상
-  const todayTopView  = [...todayVids].sort((a, b) => (b.views||0) - (a.views||0))[0]; // 오늘 최다 조회수
+  const todayLive     = todayVids.find(v => isLiveVideo(v));                              // 오늘 라이브
+  const mostViewed    = [...pool_src].sort((a, b) => (b.views||0) - (a.views||0))[0];   // 누적 최다 조회수
+  const mostRecent    = pool_src[0];                                                      // 가장 최근 영상
+  const todayTopView  = [...todayVids].sort((a, b) => (b.views||0) - (a.views||0))[0];   // 오늘 최다 조회수
 
   const pool = [...new Set([todayLive, mostViewed, mostRecent, todayTopView].filter(Boolean))];
-  return pool[Math.floor(Math.random() * pool.length)] || videos[0];
+  return pool[Math.floor(Math.random() * pool.length)] || pool_src[0];
 }
 
 function getBucket(pub) {
