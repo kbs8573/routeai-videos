@@ -33,6 +33,35 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
       overflow-x: hidden; }
 
+    /* ── Intro overlay ── */
+    #intro-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .6s ease;
+    }
+    #intro-overlay iframe { width: 100%; height: 100%; border: none; pointer-events: none; }
+    #intro-tl-cover { position: absolute; top: 0; left: 0; width: 220px; height: 50px; background: #000; z-index: 1; }
+    #intro-progress {
+      position: absolute; bottom: 0; left: 0; height: 3px; background: #e50914;
+      animation: progress-bar 3s linear forwards;
+    }
+    @keyframes progress-bar { from { width: 0 } to { width: 100% } }
+    #intro-unmute {
+      position: absolute; bottom: 20px; left: 20px;
+      color: #fff; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.3);
+      border-radius: 50%; width: 44px; height: 44px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: background .15s;
+    }
+    #intro-unmute:hover { background: rgba(229,9,20,.8); border-color: #e50914; }
+    #intro-skip {
+      position: absolute; bottom: 20px; right: 20px;
+      color: rgba(255,255,255,.65); font-size: 13px; cursor: pointer;
+      background: rgba(0,0,0,.55); padding: 7px 16px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.2); transition: color .15s, border-color .15s;
+    }
+    #intro-skip:hover { color: #fff; border-color: rgba(255,255,255,.5); }
+
     /* ── Netflix Nav ── */
     #nf-nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
@@ -61,6 +90,72 @@
     }
     .btn-refresh:hover { background: #e50914; border-color: #e50914; color: #fff; }
     .btn-refresh:active { transform: rotate(180deg); }
+
+    /* ── Hero ── */
+    #hero {
+      position: relative; width: 100%; height: 85vh; min-height: 520px;
+      overflow: hidden; background: #000;
+    }
+    #hero-thumb {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center top;
+      transition: opacity 1s ease;
+    }
+    #hero-iframe {
+      position: absolute;
+      top: -60px; left: -10%;
+      width: 120%; height: calc(100% + 120px);
+      border: none; pointer-events: none;
+      transition: opacity 1s ease;
+    }
+    #hero-gradient {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        linear-gradient(to right, rgba(0,0,0,.75) 0%, rgba(0,0,0,.25) 55%, transparent 100%),
+        linear-gradient(to top, #141414 0%, rgba(20,20,20,.65) 22%, transparent 55%);
+    }
+    #hero-info {
+      position: absolute; bottom: 30%; left: 4%; max-width: 44%;
+    }
+    #hero-ch-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,.55); margin-bottom: 14px;
+    }
+    #hero-title {
+      font-size: clamp(22px, 3.4vw, 52px); font-weight: 900; line-height: 1.15;
+      color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.7);
+      margin-bottom: 24px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    #hero-btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .h-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 26px; border-radius: 4px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      border: none; text-decoration: none; transition: opacity .2s;
+    }
+    .h-btn-play { background: #fff; color: #000; }
+    .h-btn-play:hover { opacity: .85; }
+    .h-btn-more { background: rgba(109,109,110,.7); color: #fff; }
+    .h-btn-more:hover { background: rgba(109,109,110,.5); }
+    #hero-mute {
+      position: absolute; bottom: 30%; right: 4%;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: transparent; border: 2px solid rgba(255,255,255,.6);
+      color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s, background .2s;
+    }
+    #hero-mute:hover { border-color: #fff; background: rgba(255,255,255,.15); }
+    #hero-replay {
+      position: absolute; bottom: 30%; right: 4%;
+      padding: 8px 18px; border-radius: 4px;
+      background: rgba(0,0,0,.6); border: 2px solid rgba(255,255,255,.5);
+      color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+      display: none; transition: background .2s;
+    }
+    #hero-replay:hover { background: rgba(255,255,255,.15); }
 
     /* ── Sub-header info ── */
     .sub-info {
@@ -373,8 +468,17 @@
     }
     #content { display: none; }
 
+    @media (min-width: 641px) and (max-width: 1024px) {
+      #hero { height: 60vh; min-height: 340px; }
+      #hero-info { max-width: 60%; }
+    }
     @media (max-width: 640px) {
       :root { --v-w: 210px; --s-w: 128px; }
+      #hero { height: 60vh; min-height: 300px; }
+      #hero-info { bottom: 16%; left: 4%; max-width: 82%; }
+      #hero-title { margin-bottom: 14px; }
+      .h-btn { font-size: 13px; padding: 8px 18px; }
+      #hero-mute, #hero-replay { bottom: 16%; }
       .filter-bar, .rail { padding-left: 14px; padding-right: 14px; }
       .t-head { padding: 16px 14px 8px; }
       .rail-label { padding-left: 14px; }
@@ -383,6 +487,24 @@
   </style>
 </head>
 <body>
+
+<!-- ── Intro Overlay ── -->
+<div id="intro-overlay">
+  <iframe id="intro-iframe"
+    src="https://www.youtube-nocookie.com/embed/0JyWrRmsjss?start=34&autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1"
+    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <div id="intro-tl-cover"></div>
+  <div id="intro-progress"></div>
+  <button id="intro-unmute" onclick="introToggleMute()" title="소리 켜기">
+    <svg id="ico-mute" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.5 12A4.5 4.5 0 0 0 14 8v2.18l2.45 2.45c.05-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0 0 17.73 19l1.98 2L21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+    </svg>
+    <svg id="ico-sound" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.23v2.06A6.5 6.5 0 0 1 14 20.71v2.06c3.88-.99 6.71-4.53 6.71-8.77S17.88 4.22 14 3.23z"/>
+    </svg>
+  </button>
+  <div id="intro-skip" onclick="dismissIntro()">건너뛰기 ›</div>
+</div>
 
 <!-- ── Netflix Nav ── -->
 <nav id="nf-nav">
@@ -401,8 +523,38 @@
   </div>
 </nav>
 
+<!-- ── Hero ── -->
+<section id="hero">
+  <div id="hero-thumb"></div>
+
+  <div id="hero-gradient"></div>
+  <div id="hero-info">
+    <div id="hero-ch-label"></div>
+    <h1 id="hero-title"></h1>
+    <div id="hero-btns">
+      <a id="hero-play-btn" class="h-btn h-btn-play" href="#" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        재생
+      </a>
+      <button class="h-btn h-btn-more" onclick="showVideoModal(window._heroVideo)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        자세히 보기
+      </button>
+    </div>
+  </div>
+  <button id="hero-mute" onclick="heroToggleMute()" title="음소거 해제">
+    <svg id="hero-ico-mute" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16.5 12A4.5 4.5 0 0 0 14 8v2.18l2.45 2.45c.05-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.796 8.796 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06A8.99 8.99 0 0 0 17.73 19l1.98 2L21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+    </svg>
+    <svg id="hero-ico-sound" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.23v2.06A6.5 6.5 0 0 1 14 20.71v2.06c3.88-.99 6.71-4.53 6.71-8.77S17.88 4.22 14 3.23z"/>
+    </svg>
+  </button>
+  <button id="hero-replay" onclick="heroReplay()">↺ 다시 보기</button>
+</section>
+
 <!-- ── Sub info + Filter ── -->
-<div id="content" style="padding-top:68px">
+<div id="content">
   <div class="sub-info">
     <span id="sub-text">불러오는 중…</span>
   </div>
@@ -450,6 +602,27 @@ function isLiveVideo(v) {
   return v.type === 'live' || /\[?LIVE\]?|라이브/i.test(v.title);
 }
 
+function pickHeroVideo(videos) {
+  const now = Date.now();
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+
+  // 1. 현재 라이브 중: type=live + 4시간 이내 업로드
+  const currentLive = videos.find(v =>
+    isLiveVideo(v) && (now - new Date(v.publishedAt).getTime()) < 4 * 3600_000
+  );
+  if (currentLive) return currentLive;
+
+  // 2. 후보 풀 (랜덤)
+  const todayVids = videos.filter(v => new Date(v.publishedAt) >= todayStart);
+
+  const todayLive     = todayVids.find(v => isLiveVideo(v));                           // 오늘 라이브
+  const mostViewed    = [...videos].sort((a, b) => (b.views||0) - (a.views||0))[0];   // 누적 최다 조회수
+  const mostRecent    = videos[0];                                                      // 가장 최근 영상
+  const todayTopView  = [...todayVids].sort((a, b) => (b.views||0) - (a.views||0))[0]; // 오늘 최다 조회수
+
+  const pool = [...new Set([todayLive, mostViewed, mostRecent, todayTopView].filter(Boolean))];
+  return pool[Math.floor(Math.random() * pool.length)] || videos[0];
+}
 
 function getBucket(pub) {
   const today = new Date(); today.setHours(0,0,0,0);
@@ -563,6 +736,10 @@ function parseYtData(data) {
 
 // ── Render ────────────────────────────────────────────────
 function render(videos) {
+  // Hero 영상 선택
+  window._heroVideo = pickHeroVideo(videos);
+  initHero(window._heroVideo);
+
   const buckets = CATS.map(() => ({ lives: [], videos: [], shorts: [] }));
   videos.forEach(v => {
     const b = getBucket(v.publishedAt instanceof Date ? v.publishedAt : new Date(v.publishedAt));
@@ -953,7 +1130,18 @@ function vdToggleMute() {
 
 function closeVideoModal() {
   clearTimeout(modalTimer);
+  const targetMuted = modalMuted;  // 모달 닫힐 때 소리 상태 저장
   document.getElementById('vd-overlay')?.remove();
+
+  if (!document.getElementById('hero-iframe') && window._heroVideo) {
+    // 히어로가 정지된 상태 → 재시작 후 소리 상태 적용
+    initHero(window._heroVideo);
+    // initHero가 muted=true로 초기화하므로, 원하는 상태로 덮어씀
+    setTimeout(() => setHeroMuted(targetMuted), 800);
+  } else {
+    // 히어로가 재생 중이었으면 소리 상태만 인수
+    setHeroMuted(targetMuted);
+  }
 }
 
 function showYtPopup() {
@@ -1008,10 +1196,158 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Intro ────────────────────────────────────────────────
+let introMuted = true;
+function introToggleMute() {
+  const iframe = document.getElementById('intro-iframe');
+  if (!iframe) return;
+  introMuted = !introMuted;
+  iframe.contentWindow.postMessage(JSON.stringify({ event:'command', func: introMuted ? 'mute' : 'unMute', args:[] }), '*');
+  document.getElementById('ico-mute').style.display  = introMuted ? '' : 'none';
+  document.getElementById('ico-sound').style.display = introMuted ? 'none' : '';
+}
+function dismissIntro() {
+  const overlay = document.getElementById('intro-overlay');
+  if (!overlay) return;
+  overlay.style.opacity = '0';
+  setTimeout(() => overlay.remove(), 650);
+}
+setTimeout(dismissIntro, 3000);
+
+// ── Hero ─────────────────────────────────────────────────
+let heroMuted = true;
+let heroTimer = null;
+let heroStartedAt = 0;   // 히어로 재생 시작 시각 (elapsed 계산용)
+let heroPausedAt  = null; // 스크롤 아웃으로 일시정지된 경과 시간(초), null=정지 아님
+const HERO_IFRAME_STYLE = 'position:absolute;top:-60px;left:-10%;width:120%;height:calc(100% + 120px);border:none;pointer-events:none;transition:opacity 1s ease;';
+
+function createHeroIframe(videoId, startSec = 0) {
+  document.getElementById('hero-iframe')?.remove();
+  const iframe = document.createElement('iframe');
+  iframe.id    = 'hero-iframe';
+  iframe.style.cssText = HERO_IFRAME_STYLE;
+  iframe.allow = 'autoplay; encrypted-media';
+  iframe.allowFullscreen = true;
+  const start  = startSec > 0 ? `&start=${Math.floor(startSec)}` : '';
+  iframe.src   = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1${start}`;
+  document.getElementById('hero').insertBefore(iframe, document.getElementById('hero-gradient'));
+  return iframe;
+}
+
+function stopHeroVideo() {
+  heroPausedAt = null;  // 명시적 정지 — 스크롤 복귀 시 재개 안 함
+  clearTimeout(heroTimer);
+  document.getElementById('hero-iframe')?.remove();   // DOM 제거 → 즉시 재생 중단, 히스토리 무영향
+  document.getElementById('hero-thumb').style.opacity  = '1';
+  document.getElementById('hero-mute').style.display   = 'none';
+  document.getElementById('hero-replay').style.display = 'flex';
+}
+
+function initHero(v) {
+  if (!v) return;
+  const thumb = document.getElementById('hero-thumb');
+  document.getElementById('hero-ch-label').textContent = v.channelLabel || '';
+  document.getElementById('hero-title').textContent    = v.title || '';
+  document.getElementById('hero-play-btn').href        = v.url || '#';
+  thumb.style.backgroundImage = `url('${v.thumb}')`;
+
+  // 버튼 상태 항상 초기화
+  heroMuted = true;
+  document.getElementById('hero-mute').style.display    = 'flex';
+  document.getElementById('hero-replay').style.display  = 'none';
+  document.getElementById('hero-ico-mute').style.display  = '';
+  document.getElementById('hero-ico-sound').style.display = 'none';
+
+  heroPausedAt  = null;
+  heroStartedAt = Date.now();
+  const iframe = createHeroIframe(v.id);
+  iframe.style.opacity = '1';
+  thumb.style.opacity  = '0.3';
+
+  clearTimeout(heroTimer);
+  heroTimer = setTimeout(stopHeroVideo, 60000);  // 1분 후 정지
+}
+
+function heroReplay() {
+  const v = window._heroVideo;
+  if (!v) return;
+  document.getElementById('hero-replay').style.display = 'none';
+  document.getElementById('hero-mute').style.display   = 'flex';
+  heroMuted = true;
+  document.getElementById('hero-ico-mute').style.display  = '';
+  document.getElementById('hero-ico-sound').style.display = 'none';
+  initHero(v);
+}
+
+function heroToggleMute() { setHeroMuted(!heroMuted); }
+
+function setHeroMuted(muted) {
+  heroMuted = muted;
+  document.getElementById('hero-iframe')
+    ?.contentWindow?.postMessage(JSON.stringify({ event:'command', func: muted ? 'mute' : 'unMute', args:[] }), '*');
+  document.getElementById('hero-ico-mute').style.display  = muted ? '' : 'none';
+  document.getElementById('hero-ico-sound').style.display = muted ? 'none' : '';
+}
 
 // Nav 스크롤 시 배경 solid
 window.addEventListener('scroll', () => {
   document.getElementById('nf-nav').classList.toggle('solid', window.scrollY > 20);
+}, { passive: true });
+
+// ── 히어로 스크롤 일시정지 / 재개 ──────────────────────────────────────────
+// iOS Safari는 scroll/setTimeout 콜백에서 새로 생성한 iframe의 autoplay를 차단.
+// 따라서 scroll-out 시 iframe을 제거하지 않고 pauseVideo + 숨김,
+// scroll-in 시 playVideo + 표시하여 재개함 (iframe 재생성 없음).
+
+function pauseHeroForScroll() {
+  const iframe = document.getElementById('hero-iframe');
+  if (!iframe) return;
+  heroPausedAt = heroStartedAt ? Math.floor((Date.now() - heroStartedAt) / 1000) : 0;
+  clearTimeout(heroTimer);
+  iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'pauseVideo', args:[]}), '*');
+  iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'mute',        args:[]}), '*');
+  iframe.style.opacity = '0';
+  document.getElementById('hero-thumb').style.opacity = '1';
+}
+
+let _heroResumeTimer = null;
+function scheduleHeroResume() {
+  clearTimeout(_heroResumeTimer);
+  _heroResumeTimer = setTimeout(() => {
+    if (heroPausedAt === null || !window._heroVideo) return;
+    const iframe = document.getElementById('hero-iframe');
+    if (!iframe) return; // stopHeroVideo()가 이미 호출된 상태
+    const elapsed   = heroPausedAt;
+    heroPausedAt    = null;
+    const remaining = 60 - elapsed;
+    if (remaining <= 0) { stopHeroVideo(); return; }
+    heroStartedAt = Date.now() - elapsed * 1000;
+    iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'playVideo', args:[]}), '*');
+    iframe.style.opacity = '1';
+    document.getElementById('hero-thumb').style.opacity = '0.3';
+    clearTimeout(heroTimer);
+    heroTimer = setTimeout(stopHeroVideo, remaining * 1000);
+    if (!heroMuted) setTimeout(() => setHeroMuted(false), 300);
+  }, 300);
+}
+
+// IntersectionObserver: 스크롤 아웃 감지 (Android / 데스크탑)
+new IntersectionObserver(entries => {
+  const isVisible = entries[0].isIntersecting;
+  if (!isVisible) {
+    clearTimeout(_heroResumeTimer);
+    pauseHeroForScroll();
+  } else {
+    scheduleHeroResume();
+  }
+}, { threshold: 0.1 }).observe(document.getElementById('hero'));
+
+// scroll 이벤트 fallback: iOS Safari는 최상단 복귀 시 IO가 발화하지 않는 버그 존재
+window.addEventListener('scroll', () => {
+  if (heroPausedAt === null) return;
+  const rect = document.getElementById('hero').getBoundingClientRect();
+  if (rect.bottom > window.innerHeight * 0.2) scheduleHeroResume();
+  else { clearTimeout(_heroResumeTimer); }
 }, { passive: true });
 
 loadVideos();
