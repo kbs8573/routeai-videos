@@ -491,7 +491,7 @@
 <!-- ── Intro Overlay ── -->
 <div id="intro-overlay">
   <iframe id="intro-iframe"
-    src="https://www.youtube.com/embed/0JyWrRmsjss?start=34&autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1"
+    src="https://www.youtube-nocookie.com/embed/0JyWrRmsjss?start=34&autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1"
     allow="autoplay; encrypted-media" allowfullscreen></iframe>
   <div id="intro-tl-cover"></div>
   <div id="intro-progress"></div>
@@ -1023,7 +1023,7 @@ function showVideoModal(v) {
       </button>
       <div id="vd-video-wrap">
         <iframe id="vd-iframe"
-          src="https://www.youtube.com/embed/${esc(v.id)}?autoplay=1&mute=1&start=${start}&controls=0&disablekb=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1"
+          src="https://www.youtube-nocookie.com/embed/${esc(v.id)}?autoplay=1&mute=1&start=${start}&controls=0&disablekb=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1"
           style="pointer-events:none"
           allow="autoplay; encrypted-media" allowfullscreen></iframe>
         <div id="vd-video-grad"></div>
@@ -1098,7 +1098,7 @@ function modalReplay() {
   // iframe 재생성 (처음부터)
   const iframe = document.createElement('iframe');
   iframe.id = 'vd-iframe';
-  iframe.src = `https://www.youtube.com/embed/${esc(v.id)}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1`;
+  iframe.src = `https://www.youtube-nocookie.com/embed/${esc(v.id)}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1`;
   iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;pointer-events:none;';
   iframe.allow = 'autoplay; encrypted-media';
   iframe.allowFullscreen = true;
@@ -1229,7 +1229,7 @@ function createHeroIframe(videoId, startSec = 0) {
   iframe.allow = 'autoplay; encrypted-media';
   iframe.allowFullscreen = true;
   const start  = startSec > 0 ? `&start=${Math.floor(startSec)}` : '';
-  iframe.src   = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1${start}`;
+  iframe.src   = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&enablejsapi=1${start}`;
   document.getElementById('hero').insertBefore(iframe, document.getElementById('hero-gradient'));
   return iframe;
 }
