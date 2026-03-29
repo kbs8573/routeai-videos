@@ -485,10 +485,10 @@
     <div id="hero-ch-label"></div>
     <h1 id="hero-title"></h1>
     <div id="hero-btns">
-      <a id="hero-play-btn" class="h-btn h-btn-play" href="#" target="_blank" rel="noopener">
+      <button id="hero-play-btn" class="h-btn h-btn-play" onclick="showVideoModal(window._heroVideo)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
         재생
-      </a>
+      </button>
       <button class="h-btn h-btn-more" onclick="showVideoModal(window._heroVideo)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         자세히 보기
@@ -693,6 +693,9 @@ function parseYtData(data) {
 
 // ── Render ────────────────────────────────────────────────
 function render(videos) {
+  // 영상 ID → 객체 맵 (카드 클릭 시 모달에서 조회)
+  window._videoMap = Object.fromEntries(videos.map(v => [v.id, v]));
+
   // Hero 영상 선택
   window._heroVideo = pickHeroVideo(videos);
   initHero(window._heroVideo);
@@ -908,7 +911,7 @@ function cardHTML(v) {
   const views   = v.views != null ? `👁 ${fmtN(v.views)}` : '';
 
   return `
-<a class="card card-${isShort ? 's' : 'v'}" href="${esc(v.url)}" target="_blank" rel="noopener">
+<a class="card card-${isShort ? 's' : 'v'}" href="${esc(v.url)}" target="_blank" rel="noopener" onclick="event.preventDefault();showVideoModal(window._videoMap['${esc(v.id)}'])">
   <div class="thumb">
     <img src="${esc(v.thumb)}" alt="${esc(v.title)}" loading="lazy"
       onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
@@ -1188,7 +1191,6 @@ function initHero(v) {
   const thumb = document.getElementById('hero-thumb');
   document.getElementById('hero-ch-label').textContent = v.channelLabel || '';
   document.getElementById('hero-title').textContent    = v.title || '';
-  document.getElementById('hero-play-btn').href        = v.url || '#';
   thumb.style.backgroundImage = `url('${v.thumb}')`;
 
   // 버튼 상태 항상 초기화
