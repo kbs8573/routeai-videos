@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-08T22:05:42Z",
+  "updated": "2026-04-08T23:06:37Z",
   "channelIds": [
     "UCDq9_N34UnlMSlFB4kWE15w"
   ],
@@ -14,7 +14,7 @@
       "id": "bQ5XN9ECBmA",
       "title": "구글 스티치 2026 기초 사용법ㅣ1분만에 앱 디자인 퀄리티 500% 올려보세요",
       "publishedAt": "2026-03-31T11:23:58Z",
-      "views": 8132,
+      "views": 8134,
       "thumb": "https://i.ytimg.com/vi/bQ5XN9ECBmA/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=bQ5XN9ECBmA",
       "type": "video",
@@ -58,7 +58,7 @@
       "id": "H4FGqX8ayN0",
       "title": "NotebookLM + AI 에이전트 A to Z 이 영상 하나로 끝내드려요ㅣAI 비서, 데이터분석, 보고서 작성 실습까지",
       "publishedAt": "2026-02-26T09:00:34Z",
-      "views": 70502,
+      "views": 70517,
       "thumb": "https://i.ytimg.com/vi/H4FGqX8ayN0/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=H4FGqX8ayN0",
       "type": "video",
@@ -69,7 +69,7 @@
       "id": "qfVqIhkWL7A",
       "title": "클로드 코워크 A to Z 이 영상 하나로 끝내드려요 l AI 비서, 데이터분석, 보고서 작성 실습까지",
       "publishedAt": "2026-02-19T05:56:55Z",
-      "views": 196912,
+      "views": 196947,
       "thumb": "https://i.ytimg.com/vi/qfVqIhkWL7A/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=qfVqIhkWL7A",
       "type": "video",
@@ -113,7 +113,7 @@
       "id": "yAX44LE9VJc",
       "title": "바이브 코딩 성공률 10배 올리는 6가지 핵심 꿀팁",
       "publishedAt": "2026-02-08T04:06:55Z",
-      "views": 3463,
+      "views": 3467,
       "thumb": "https://i.ytimg.com/vi/yAX44LE9VJc/mqdefault.jpg",
       "url": "https://www.youtube.com/shorts/yAX44LE9VJc",
       "type": "short",
@@ -121,10 +121,32 @@
       "channelLabel": "RouteAI"
     },
     {
+      "id": "TImjZnT87ys",
+      "title": "바이브코딩 딱 15분만에 전부 알려드립니다 l 개념, 툴, 사용법 - [유퀴즈 출연한 코로나맵 개발자]",
+      "publishedAt": "2026-02-07T23:06:37Z",
+      "views": 94359,
+      "thumb": "https://i.ytimg.com/vi/TImjZnT87ys/mqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=TImjZnT87ys",
+      "type": "video",
+      "channel": "routeai",
+      "channelLabel": "RouteAI"
+    },
+    {
+      "id": "tuv5166fxbA",
+      "title": "바이브코딩 10분 만에 움직이는 홈페이지 제작 딸깍!ㅣ제미나이 3.0",
+      "publishedAt": "2026-02-07T23:06:37Z",
+      "views": 1324,
+      "thumb": "https://i.ytimg.com/vi/tuv5166fxbA/mqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=tuv5166fxbA",
+      "type": "video",
+      "channel": "routeai",
+      "channelLabel": "RouteAI"
+    },
+    {
       "id": "OqK1CVIgePs",
       "title": "바이브 코딩으로 가능 vs 불가능",
       "publishedAt": "2026-02-06T02:26:04Z",
-      "views": 39614,
+      "views": 39616,
       "thumb": "https://i.ytimg.com/vi/OqK1CVIgePs/mqdefault.jpg",
       "url": "https://www.youtube.com/shorts/OqK1CVIgePs",
       "type": "short",
@@ -157,7 +179,7 @@
       "id": "vXBZTUxZCg8",
       "title": "바이브 코딩이란?",
       "publishedAt": "2026-02-01T03:01:11Z",
-      "views": 3048,
+      "views": 3049,
       "thumb": "https://i.ytimg.com/vi/vXBZTUxZCg8/mqdefault.jpg",
       "url": "https://www.youtube.com/shorts/vXBZTUxZCg8",
       "type": "short",
@@ -172,6 +194,50 @@
       "thumb": "https://i.ytimg.com/vi/bJtyCHWDzgs/mqdefault.jpg",
       "url": "https://www.youtube.com/shorts/bJtyCHWDzgs",
       "type": "short",
+      "channel": "routeai",
+      "channelLabel": "RouteAI"
+    },
+    {
+      "id": "gCHMlHOIqds",
+      "title": "코딩 몰라도 됩니다! 제미나이 3.0으로 10분만에 홈페이지 만들기",
+      "publishedAt": "2026-01-08T23:06:37Z",
+      "views": 4011,
+      "thumb": "https://i.ytimg.com/vi/gCHMlHOIqds/mqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=gCHMlHOIqds",
+      "type": "video",
+      "channel": "routeai",
+      "channelLabel": "RouteAI"
+    },
+    {
+      "id": "uh3Y4IFGHvg",
+      "title": "솔직히 n8n보다 좋습니다.. 오픈AI Agent Builder 300% 사용법",
+      "publishedAt": "2026-01-08T23:06:37Z",
+      "views": 1655,
+      "thumb": "https://i.ytimg.com/vi/uh3Y4IFGHvg/mqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=uh3Y4IFGHvg",
+      "type": "video",
+      "channel": "routeai",
+      "channelLabel": "RouteAI"
+    },
+    {
+      "id": "byiF4GoJ9gA",
+      "title": "(무료 자료 제공) 99%가 모르는 Gemini 3 설정법 7가지! 늦게 알면 폭풍 오열",
+      "publishedAt": "2026-01-08T23:06:37Z",
+      "views": 27351,
+      "thumb": "https://i.ytimg.com/vi/byiF4GoJ9gA/mqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=byiF4GoJ9gA",
+      "type": "video",
+      "channel": "routeai",
+      "channelLabel": "RouteAI"
+    },
+    {
+      "id": "2y0LXsZoJAE",
+      "title": "코딩 몰라도 됩니다! n8n AI로 3분 만에 자동화 시스템 만드는 법",
+      "publishedAt": "2026-01-08T23:06:37Z",
+      "views": 14705,
+      "thumb": "https://i.ytimg.com/vi/2y0LXsZoJAE/mqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=2y0LXsZoJAE",
+      "type": "video",
       "channel": "routeai",
       "channelLabel": "RouteAI"
     }
