@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-01T14:35:45Z",
+  "updated": "2026-05-01T15:52:45Z",
   "channelIds": [
     "UCDq9_N34UnlMSlFB4kWE15w"
   ],
@@ -11,10 +11,21 @@
   ],
   "videos": [
     {
+      "id": "ewgbQRow1T4",
+      "title": "클로드 왕초보 완벽 가이드 A to Z l 2026년 5월 최신 버전",
+      "publishedAt": "2026-05-01T14:50:09Z",
+      "views": 157,
+      "thumb": "https://i.ytimg.com/vi/ewgbQRow1T4/mqdefault.jpg",
+      "url": "https://www.youtube.com/watch?v=ewgbQRow1T4",
+      "type": "video",
+      "channel": "routeai",
+      "channelLabel": "RouteAI"
+    },
+    {
       "id": "MFZX1I_REyg",
       "title": "하네스 엔지니어링 15분 만에 이해시켜드립니다 | 개념, 핵심 원칙, AI 에이전트",
       "publishedAt": "2026-04-16T12:06:51Z",
-      "views": 30530,
+      "views": 30597,
       "thumb": "https://i.ytimg.com/vi/MFZX1I_REyg/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=MFZX1I_REyg",
       "type": "video",
@@ -69,7 +80,7 @@
       "id": "SYKUWLSrKWA",
       "title": "클로드 코드 + n8n + Skills로 자동화 완성해서 업무 생산성 10배 상승시키기 l 클로드 코드, n8n, MCP, Skills 사용법",
       "publishedAt": "2026-03-05T07:48:34Z",
-      "views": 18629,
+      "views": 18638,
       "thumb": "https://i.ytimg.com/vi/SYKUWLSrKWA/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=SYKUWLSrKWA",
       "type": "video",
@@ -80,7 +91,7 @@
       "id": "H4FGqX8ayN0",
       "title": "NotebookLM + AI 에이전트 A to Z 이 영상 하나로 끝내드려요ㅣAI 비서, 데이터분석, 보고서 작성 실습까지",
       "publishedAt": "2026-02-26T09:00:34Z",
-      "views": 77468,
+      "views": 77477,
       "thumb": "https://i.ytimg.com/vi/H4FGqX8ayN0/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=H4FGqX8ayN0",
       "type": "video",
@@ -91,7 +102,7 @@
       "id": "qfVqIhkWL7A",
       "title": "클로드 코워크 A to Z 이 영상 하나로 끝내드려요 l AI 비서, 데이터분석, 보고서 작성 실습까지",
       "publishedAt": "2026-02-19T05:56:55Z",
-      "views": 230085,
+      "views": 230147,
       "thumb": "https://i.ytimg.com/vi/qfVqIhkWL7A/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=qfVqIhkWL7A",
       "type": "video",
@@ -102,7 +113,7 @@
       "id": "YiVOAOfFfIs",
       "title": "(무료 자료 제공) 바이브코딩 구글 AI 스튜디오로 7분 만에 웹사이트 완성 l 퀄리티 5배 상승하는 방법",
       "publishedAt": "2026-02-14T14:40:13Z",
-      "views": 4821,
+      "views": 4834,
       "thumb": "https://i.ytimg.com/vi/YiVOAOfFfIs/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=YiVOAOfFfIs",
       "type": "video",
@@ -146,7 +157,7 @@
       "id": "OqK1CVIgePs",
       "title": "바이브 코딩으로 가능 vs 불가능",
       "publishedAt": "2026-02-06T02:26:04Z",
-      "views": 58737,
+      "views": 58826,
       "thumb": "https://i.ytimg.com/vi/OqK1CVIgePs/mqdefault.jpg",
       "url": "https://www.youtube.com/shorts/OqK1CVIgePs",
       "type": "short",
@@ -157,21 +168,10 @@
       "id": "HeuI4teMkxk",
       "title": "n8n 에이전트 500% 활용해서 업무 자동화 끝내세요 l 12분 실전 압축 가이드",
       "publishedAt": "2026-02-04T15:04:24Z",
-      "views": 2017,
+      "views": 2019,
       "thumb": "https://i.ytimg.com/vi/HeuI4teMkxk/mqdefault.jpg",
       "url": "https://www.youtube.com/watch?v=HeuI4teMkxk",
       "type": "video",
-      "channel": "routeai",
-      "channelLabel": "RouteAI"
-    },
-    {
-      "id": "VD5q2a1gKMo",
-      "title": "바이브 코딩 디자인 딱 이 3곳만 참고하면 끝!",
-      "publishedAt": "2026-02-03T08:27:27Z",
-      "views": 8934,
-      "thumb": "https://i.ytimg.com/vi/VD5q2a1gKMo/mqdefault.jpg",
-      "url": "https://www.youtube.com/shorts/VD5q2a1gKMo",
-      "type": "short",
       "channel": "routeai",
       "channelLabel": "RouteAI"
     }
